@@ -161,7 +161,9 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setPrompts}) =>
 
         console.log(requestData);
 
-        fetch('http://localhost:8000/prompts/one-shot-completion', {
+        const requestURL = prompt.type === 'react' ? 'http://localhost:8000/prompts/react-prompt-completion' : 'http://localhost:8000/prompts/prompt-completion';
+
+        fetch(requestURL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

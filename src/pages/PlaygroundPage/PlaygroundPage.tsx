@@ -17,7 +17,7 @@ import OneShot from "@/pages/PlaygroundPage/Components/PromptingTechniques/OneSh
 import FiveShot from "@/pages/PlaygroundPage/Components/PromptingTechniques/FiveShot.tsx";
 import ChainOfThought from "@/pages/PlaygroundPage/Components/PromptingTechniques/ChainOfThought.tsx";
 import ChainOfThought5Shot from "@/pages/PlaygroundPage/Components/PromptingTechniques/ChainOfThought5Shot.tsx";
-import ReactPrompting from "@/pages/PlaygroundPage/Components/PromptingTechniques/React.tsx"
+import ReactPrompting from "@/pages/PlaygroundPage/Components/PromptingTechniques/ReactPrompting"
 
 // Hyper Parameters
 import FrequencyPenaltySelector from "@/pages/PlaygroundPage/Components/frequency-penalty-selector.tsx";

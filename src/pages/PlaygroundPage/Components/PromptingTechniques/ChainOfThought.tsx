@@ -10,6 +10,7 @@ import {Button} from "@/components/ui/button.tsx";
 
 // Types
 import {ChainOfThoughtMessage, Prompt, PromptTabProps} from "@/lib/types.ts";
+import {useNavigate} from "react-router-dom";
 
 
 interface MessageComponentProps {
@@ -100,6 +101,8 @@ export default function ChainOfThought(props: PromptTabProps) {
     const [messages, setMessages] = useState<ChainOfThoughtMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{type: "USER", message: "", thoughts: ["", "", ""]}]);
 
     const MAX_THOUGHTS_LIMIT = 10;
+
+    const navigate = useNavigate();
 
     const handleMessageChange = (index: number, value: string) => {
         const newMessages = messages.map((message, i) => {
@@ -211,7 +214,7 @@ export default function ChainOfThought(props: PromptTabProps) {
             presencePenalty: props.presencePenaltyValue[0].toString()
         };
 
-        fetch('http://localhost:8000/prompts/one-shot-completion', {
+        fetch('http://3.82.25.134:8000/prompt-completion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -350,7 +353,7 @@ export default function ChainOfThought(props: PromptTabProps) {
     }
 
     function handleCompare() {
-
+        navigate('/compare');
     }
 
 

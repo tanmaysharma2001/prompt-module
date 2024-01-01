@@ -135,7 +135,7 @@ export default function OneShot(props: PromptTabProps) {
 
         console.log(requestData);
 
-        fetch('http://localhost:8000/prompts/one-shot-completion', {
+        fetch('http://3.82.25.134:8000/prompt-completion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

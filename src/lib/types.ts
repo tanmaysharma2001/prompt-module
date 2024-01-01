@@ -22,6 +22,18 @@ export interface ChainOfThoughtMessage {
     thoughts: string[] | null;
 }
 
+export interface ReactResponse {
+    act: string;
+    thought: string;
+    observation: string;
+}
+
+export interface ReactPromptMessage {
+    type: string;
+    message: string;
+    reactResponses: ReactResponse | null;
+}
+
 
 export interface PromptTabProps {
     playgroundPrompt: Prompt;
