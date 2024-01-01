@@ -135,7 +135,7 @@ export default function OneShot(props: PromptTabProps) {
 
         console.log(requestData);
 
-        fetch('http://prompt-module.dev.app.lyzr.ai/prompt-completion', {
+        fetch('https://prompt-module.dev.app.lyzr.ai/prompt-completion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
