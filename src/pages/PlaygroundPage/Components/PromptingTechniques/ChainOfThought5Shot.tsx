@@ -9,6 +9,9 @@ import {Button} from "@/components/ui/button.tsx";
 
 // Types
 import {Prompt, ChainOfThoughtMessage, PromptTabProps} from "@/lib/types.ts";
+import {useToast} from "@/components/ui/use-toast.ts";
+
+const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
 
 
 interface MessageComponentProps {
@@ -89,6 +92,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 
 
 export default function ChainOfThought(props: PromptTabProps) {
+
+    const { toast } = useToast();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -254,9 +259,7 @@ export default function ChainOfThought(props: PromptTabProps) {
             presencePenalty: props.presencePenaltyValue[0].toString()
         };
 
-        console.log(requestData);
-
-        fetch('https://prompt-module.dev.app.lyzr.ai/prompt-completion', {
+        fetch(PROMPT_COMPLETION_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -357,6 +360,10 @@ export default function ChainOfThought(props: PromptTabProps) {
 
         // Step 4: Save the updated array back to local storage
         localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
+
+        toast({
+            title: "Prompt Saved!"
+        })
 
         setIsSaving(false);
     }

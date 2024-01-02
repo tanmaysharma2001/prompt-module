@@ -6,10 +6,14 @@ import {Button} from "@/components/ui/button.tsx";
 
 // Types
 import {APIKey, Prompt} from "@/lib/types.ts";
+import {useNavigate} from "react-router-dom";
 
 interface UserMessagesProp {
     prompt: Prompt;
 }
+
+const REACT_PROMPT_COMPLETION_URL = import.meta.env.REACT_VITE_PROMPT_COMPLETION_URL;
+const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
 
 const UserMessages: React.FC<UserMessagesProp> = ({prompt}) => {
 
@@ -97,6 +101,8 @@ interface TableComponentProps {
 
 const TableComponent: React.FC<TableComponentProps> = ({prompts, setPrompts}) => {
 
+    const navigate = useNavigate();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // View Prompts: Duplicate use to modify prompts view without the need of modifying the original prompts.
@@ -159,9 +165,7 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setPrompts}) =>
             presencePenalty: prompt.presencePenalty,
         };
 
-        console.log(requestData);
-
-        const requestURL = prompt.type === 'react' ? 'http://localhost:8000/prompts/react-prompt-completion' : 'http://localhost:8000/prompts/prompt-completion';
+        const requestURL = prompt.type === 'react' ? REACT_PROMPT_COMPLETION_URL : PROMPT_COMPLETION_URL;
 
         fetch(requestURL, {
             method: 'POST',
@@ -221,6 +225,11 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setPrompts}) =>
         }));
     }
 
+    function handlePlaygroundNavigation(prompt: Prompt) {
+        sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
+        navigate("/");
+    }
+
 
     return (
         <div className={"flex flex-row"}>
@@ -230,23 +239,6 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setPrompts}) =>
                         <div>
                             {prompt.model.toUpperCase()}
                         </div>
-                        {/*<svg*/}
-                        {/*    xmlns="http://www.w3.org/2000/svg"*/}
-                        {/*    fill="none"*/}
-                        {/*    viewBox="0 0 24 24"*/}
-                        {/*    stroke-width="1.5"*/}
-                        {/*    stroke="currentColor"*/}
-                        {/*    className="mt-1 ml-1 w-4 h-4"*/}
-                        {/*    onClick={(e) => {*/}
-                        {/*        handleModelOpen(prompt.id);*/}
-                        {/*    }}*/}
-                        {/*>*/}
-                        {/*    <path*/}
-                        {/*        stroke-linecap="round"*/}
-                        {/*        stroke-linejoin="round"*/}
-                        {/*        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"*/}
-                        {/*    />*/}
-                        {/*</svg>*/}
                         <div>
                             {prompt.type.toUpperCase()}
                         </div>
@@ -266,8 +258,29 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setPrompts}) =>
                         </div>
                     </div>
                     <div className="p-2">
-                        <div className={"p-2"}>
-                            User Message
+                        <div className={"p-2 flex flex-row justify-between"}>
+                            <div className={"text-base"}>
+                                User Message
+                            </div>
+                            <div>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    className="mt-1 ml-1 w-4 h-4"
+                                    onClick={() => {
+                                        handlePlaygroundNavigation(prompt);
+                                    }}
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                                    />
+                                </svg>
+                            </div>
                         </div>
                         {/*<textarea*/}
                         {/*    id="userMessage"*/}

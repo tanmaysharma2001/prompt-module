@@ -25,10 +25,6 @@ function App() {
                     </Route>
                 </Routes>
             </BrowserRouter>
-            {/*<PlaygroundPage />*/}
-            {/*  <ComparePage />*/}
-            {/*  {<APIKeysPage />}*/}
-            {/*<SavedPromptsPage />*/}
         </>
     )
 }

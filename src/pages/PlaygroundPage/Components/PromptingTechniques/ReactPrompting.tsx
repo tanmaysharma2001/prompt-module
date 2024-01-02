@@ -1,14 +1,17 @@
-import React, {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ShadCN Components
-import {ScrollArea} from "@/components/ui/scroll-area.tsx";
-import {MinusCircledIcon, PlusCircledIcon} from "@radix-ui/react-icons";
-import {Button} from "@/components/ui/button.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { MinusCircledIcon, PlusCircledIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button.tsx";
 
 
 // Types
-import {Prompt, PromptTabProps, ReactPromptMessage, ReactResponse} from "@/lib/types.ts";
+import { Prompt, PromptTabProps, ReactPromptMessage, ReactResponse } from "@/lib/types.ts";
+import {useToast} from "@/components/ui/use-toast.ts";
+
+const REACT_PROMPT_COMPLETION_URL = import.meta.env.VITE_REACT_PROMPT_COMPLETION_URL;
 
 interface MessageComponentProps {
     idx: number;
@@ -23,16 +26,16 @@ interface MessageComponentProps {
 }
 
 const MessageComponent: React.FC<MessageComponentProps> = ({
-                                                               idx,
-                                                               type,
-                                                               message,
-                                                               onMessageChange,
-                                                               onMessageDelete,
-                                                               reactResponses,
-                                                               onActChange,
-                                                               onThoughtChange,
-                                                               onObservationChange,
-                                                           }) => {
+    idx,
+    type,
+    message,
+    onMessageChange,
+    onMessageDelete,
+    reactResponses,
+    onActChange,
+    onThoughtChange,
+    onObservationChange,
+}) => {
     return (
         <>
             <div id={"MessageComponent"} className="border-b-[1px] border-gray-300">
@@ -47,7 +50,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
                                 onChange={onMessageChange}
                                 placeholder="Enter a user message here."
                             />
-                            <MinusCircledIcon onClick={onMessageDelete} className={"m-3 h-5 w-5 hover:bg-gray-200"}/>
+                            <MinusCircledIcon onClick={onMessageDelete} className={"m-3 h-5 w-5 hover:bg-gray-200"} />
                         </div>
                         :
                         <></>
@@ -108,6 +111,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 
 export default function ReactPrompting(props: PromptTabProps) {
 
+    const { toast } = useToast();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -126,7 +131,7 @@ export default function ReactPrompting(props: PromptTabProps) {
     function handleMessageChange(index: number, value: string) {
         const newMessages = messages.map((message, i) => {
             if (i === index) {
-                return {...message, message: value};
+                return { ...message, message: value };
             }
             return message;
         })
@@ -198,22 +203,22 @@ export default function ReactPrompting(props: PromptTabProps) {
             if (lastMessage.type === "USER") {
                 setMessages(
                     [...messages,
-                        {
-                            type: "ASSISTANT",
-                            message: "",
-                            reactResponses: {
-                                thought: "",
-                                act: "",
-                                observation: ""
-                            }
+                    {
+                        type: "ASSISTANT",
+                        message: "",
+                        reactResponses: {
+                            thought: "",
+                            act: "",
+                            observation: ""
                         }
+                    }
                     ]
                 );
             } else {
-                setMessages([...messages, {type: "USER", message: "", reactResponses: null}]);
+                setMessages([...messages, { type: "USER", message: "", reactResponses: null }]);
             }
         } else {
-            setMessages([...messages, {type: "USER", message: "", reactResponses: null}]);
+            setMessages([...messages, { type: "USER", message: "", reactResponses: null }]);
         }
     }
 
@@ -275,7 +280,7 @@ export default function ReactPrompting(props: PromptTabProps) {
             presencePenalty: props.presencePenaltyValue[0].toString()
         };
 
-        fetch('https://prompt-module.dev.app.lyzr.ai/react-prompt-completion', {
+        fetch(REACT_PROMPT_COMPLETION_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -379,6 +384,10 @@ export default function ReactPrompting(props: PromptTabProps) {
         // Step 4: Save the updated array back to local storage
         localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
 
+        toast({
+            title: "Prompt Saved!"
+        })
+
         setIsSaving(false);
     }
 
@@ -443,8 +452,8 @@ export default function ReactPrompting(props: PromptTabProps) {
                     ))}
                     <div className="text-left hover:bg-gray-100 p-2">
                         <button className="ml-4 flex text-sm font-medium items-center space-x-2 p-2 rounded-md"
-                                onClick={addMessageComponent}>
-                            <PlusCircledIcon className={"mr-3 h-3 w-3"}/> Add Message
+                            onClick={addMessageComponent}>
+                            <PlusCircledIcon className={"mr-3 h-3 w-3"} /> Add Message
                         </button>
                     </div>
                 </ScrollArea>

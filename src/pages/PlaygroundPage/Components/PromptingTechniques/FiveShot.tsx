@@ -8,6 +8,9 @@ import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import {Button} from "@/components/ui/button.tsx";
 
 import {Prompt, PromptTabProps, OneShotMessage} from "@/lib/types.ts";
+import {useToast} from "@/components/ui/use-toast.ts";
+
+const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
 
 
 interface MessageComponentProps {
@@ -41,6 +44,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({type, message, onMes
 
 
 export default function FiveShot(props: PromptTabProps) {
+
+    const { toast } = useToast();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -169,7 +174,7 @@ export default function FiveShot(props: PromptTabProps) {
             presencePenalty: props.presencePenaltyValue[0].toString()
         };
 
-        fetch('https://prompt-module.dev.app.lyzr.ai/prompt-completion', {
+        fetch(PROMPT_COMPLETION_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -198,6 +203,7 @@ export default function FiveShot(props: PromptTabProps) {
     }
 
     const handleSave = () => {
+
         if (isSaving) return;
 
         // const lastMessage = [...messages].reverse().find(message => message.type === "USER");
@@ -254,6 +260,10 @@ export default function FiveShot(props: PromptTabProps) {
 
         // Step 4: Save the updated array back to local storage
         localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
+
+        toast({
+            title: "Prompt Saved!"
+        })
 
         setIsSaving(false);
     }

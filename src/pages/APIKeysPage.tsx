@@ -297,7 +297,9 @@ const AddNewBox: React.FC<AddNewBoxInterface> = ({apiKeys, setAPIKeys, llmModel,
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleSave}>Add Key</AlertDialogAction>
+                        <AlertDialogAction onClick={handleSave} asChild>
+                            <Button type={"submit"}>Add Key</Button>
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
