@@ -1,10 +1,10 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 // Shadcn Components
-import {Button} from "@/components/ui/button.tsx";
+import { Button } from "@/components/ui/button.tsx";
 
 // Types
-import {APIKey, Prompt} from "@/lib/types.ts";
+import { APIKey, Prompt, ReactPromptMessage } from "@/lib/types.ts";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -16,7 +16,7 @@ interface UserMessagesProp {
 const REACT_PROMPT_COMPLETION_URL = import.meta.env.REACT_VITE_PROMPT_COMPLETION_URL;
 const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
 
-const UserMessages: React.FC<UserMessagesProp> = ({prompt}) => {
+const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
 
     return (
         <div>
@@ -33,7 +33,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({prompt}) => {
                         className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder=""
                     >
-                        </textarea>
+                    </textarea>
                 </div>
                 :
                 <></>}
@@ -53,7 +53,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({prompt}) => {
                         className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder=""
                     >
-                        </textarea>
+                    </textarea>
                 </div>
                 : <></>
             }
@@ -69,7 +69,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({prompt}) => {
                         className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder=""
                     >
-                        </textarea>
+                    </textarea>
                 </div>
                 : <></>}
             {prompt.type === 'cot+5-shot' ?
@@ -87,7 +87,25 @@ const UserMessages: React.FC<UserMessagesProp> = ({prompt}) => {
                         className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder=""
                     >
-                        </textarea>
+                    </textarea>
+                </div>
+                : <></>}
+            {prompt.type === 'react' ?
+                <div>
+                    <textarea
+                        id={`userMessageBox-${prompt.id}`}
+                        value={
+                            prompt.messages.map((message: ReactPromptMessage, idx: number) => {
+                                const formattedReactResponses = message.reactResponses
+                                    ? `Act ${Math.floor(idx / 2) + 1}: ${message.reactResponses.act}\nThought ${Math.floor(idx / 2) + 1}: ${message.reactResponses.thought}\nObservation ${Math.floor(idx / 2) + 1}: ${message.reactResponses.observation}\n`
+                                    : '';
+                                return `${message.type}: ${message.message}\n${formattedReactResponses}`;
+                            }).join("\n\n")
+                        }
+                        className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder=""
+                    >
+                    </textarea>
                 </div>
                 : <></>}
         </div>
@@ -102,7 +120,7 @@ interface TableComponentProps {
     setActivePage: (value: string) => void;
 }
 
-const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingAlert, setPrompts, setActivePage }) => {
+const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoadingAlert, setPrompts, setActivePage }) => {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -110,7 +128,7 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
     // Change in prompts also results in change in viewPrompts as both are reloaded when the component is reloaded.
     const [viewPrompts, setViewPrompts] = useState<Prompt[]>(prompts);
 
-    const [promptResponses, setPromptResponses ] = useState(() => {
+    const [promptResponses, setPromptResponses] = useState(() => {
         return viewPrompts.map((prompt) => {
             return {
                 id: prompt.id,
@@ -127,7 +145,7 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
 
         if (!UserMessageBox) {
             alert('User Message not provided');
-            return ;
+            return;
         }
 
         const UserMessage = UserMessageBox.value;
@@ -142,14 +160,14 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
 
         if (keysArray.length === 0) {
             alert("You don't have any API Key Stored!");
-            return ;
+            return;
         }
 
         const KeyObject = keysArray.find((key: APIKey) => key.model === prompt.model);
 
-        if(!KeyObject) {
+        if (!KeyObject) {
             alert("You don't have the API Key for the model selected.");
-            return ;
+            return;
         }
 
         const api_key = KeyObject.api_key;
@@ -232,7 +250,6 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
 
     function handlePlaygroundNavigation(prompt: Prompt) {
         sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
-        // navigate("/");
         setActivePage('Playground');
     }
 
@@ -279,7 +296,7 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
 
                     <div className="h-12 m-1 font-bold text-lg text-center">
                         <div className={"m-2"}>
-                            Prompt {idx+1}
+                            Prompt {idx + 1}
                         </div>
                     </div>
                     <div className="h-8 m-2 text-center">
@@ -339,7 +356,7 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
                         {/*>*/}
                         {/*    {prompt.messages}*/}
                         {/*</textarea>*/}
-                        <UserMessages prompt={prompt}/>
+                        <UserMessages prompt={prompt} />
                     </div>
 
                     <div className="h-12 py-1 text-center">
@@ -351,7 +368,7 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
                         </div>
                         <textarea
                             id="responseMessage"
-                            value={promptResponses.find((prompt) => (prompt.id-1) === idx)?.response}
+                            value={promptResponses.find((prompt) => (prompt.id - 1) === idx)?.response}
                             className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             placeholder=""
                         >
@@ -411,7 +428,7 @@ export default function ComparePage(props: PageProps) {
     return (
         <div className={"m-5"}>
             {showAlert && <LoadingAlertBox />}
-            <TableComponent setShowLoadingAlert={setShowLoadingAlert} prompts={prompts} setPrompts={setPrompts} setActivePage={props.setActivePage}/>
+            <TableComponent setShowLoadingAlert={setShowLoadingAlert} prompts={prompts} setPrompts={setPrompts} setActivePage={props.setActivePage} />
         </div>
     );
 }

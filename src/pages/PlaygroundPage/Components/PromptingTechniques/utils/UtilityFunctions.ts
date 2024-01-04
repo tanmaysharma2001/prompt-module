@@ -21,7 +21,7 @@ export function sendingOneShotRequest(
         return;
     }
 
-    const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.llmModel);
+    const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.playgroundPrompt.model);
 
     if (!KeyObject) {
         alert("You don't have the API Key for the model selected.");
@@ -36,14 +36,14 @@ export function sendingOneShotRequest(
 
     const requestData = {
         api_key: apiKey,
-        model: props.llmModel,
-        system_message: props.systemMessage || "You are a helpful assistant", // Assuming systemMessage is passed as a prop
+        model: props.playgroundPrompt.model,
+        system_message: props.playgroundPrompt.system_message || "You are a helpful assistant", // Assuming systemMessage is passed as a prop
         user_message: userMessage,
-        temperature: props.tempValue[0].toString(),
-        maxLength: props.maxLengthValue[0].toString(),
-        topP: props.topPValue[0].toString(),
-        frequencyPenalty: props.freqPenaltyValue[0].toString(),
-        presencePenalty: props.presencePenaltyValue[0].toString()
+        temperature: props.playgroundPrompt.temperature[0].toString(),
+        maxLength: props.playgroundPrompt.maxLength[0].toString(),
+        topP: props.playgroundPrompt.topP[0].toString(),
+        frequencyPenalty: props.playgroundPrompt.frequencyPenalty[0].toString(),
+        presencePenalty: props.playgroundPrompt.presencePenalty[0].toString()
     };
 
     fetch(requestUrl, {
@@ -98,7 +98,7 @@ export function sendingChainOfThoughtRequest(
         return;
     }
 
-    const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.llmModel);
+    const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.playgroundPrompt.model);
 
     if (!KeyObject) {
         alert("You don't have the API Key for the model selected.");
@@ -113,14 +113,14 @@ export function sendingChainOfThoughtRequest(
 
     const requestData = {
         api_key: apiKey,
-        model: props.llmModel,
-        system_message: props.systemMessage || "You are a helpful assistant", // Assuming systemMessage is passed as a prop
+        model: props.playgroundPrompt.model,
+        system_message: props.playgroundPrompt.system_message || "You are a helpful assistant", // Assuming systemMessage is passed as a prop
         user_message: userMessage,
-        temperature: props.tempValue[0].toString(),
-        maxLength: props.maxLengthValue[0].toString(),
-        topP: props.topPValue[0].toString(),
-        frequencyPenalty: props.freqPenaltyValue[0].toString(),
-        presencePenalty: props.presencePenaltyValue[0].toString()
+        temperature: props.playgroundPrompt.temperature[0].toString(),
+        maxLength: props.playgroundPrompt.maxLength[0].toString(),
+        topP: props.playgroundPrompt.topP[0].toString(),
+        frequencyPenalty: props.playgroundPrompt.frequencyPenalty[0].toString(),
+        presencePenalty: props.playgroundPrompt.presencePenalty[0].toString()
     };
 
     fetch(requestUrl, {
@@ -176,27 +176,29 @@ export function sendingReactPromptRequest(
         return;
     }
 
-    const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.llmModel);
+    const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.playgroundPrompt.model);
 
     if (!KeyObject) {
         alert("You don't have the API Key for the model selected.");
         return;
     }
 
-    const api_key = KeyObject.api_key;
+    const apiKey = KeyObject.api_key;
 
     setIsSubmitting(true);
 
+    setIsLoading(true);
+
     const requestData = {
-        api_key: api_key,
-        model: props.llmModel,
-        system_message: props.systemMessage || "You are a helpful assistant.", // Assuming systemMessage is passed as a prop
+        api_key: apiKey,
+        model: props.playgroundPrompt.model,
+        system_message: props.playgroundPrompt.system_message || "You are a helpful assistant", // Assuming systemMessage is passed as a prop
         user_message: userMessage,
-        temperature: props.tempValue[0].toString(),
-        maxLength: props.maxLengthValue[0].toString(),
-        topP: props.topPValue[0].toString(),
-        frequencyPenalty: props.freqPenaltyValue[0].toString(),
-        presencePenalty: props.presencePenaltyValue[0].toString()
+        temperature: props.playgroundPrompt.temperature[0].toString(),
+        maxLength: props.playgroundPrompt.maxLength[0].toString(),
+        topP: props.playgroundPrompt.topP[0].toString(),
+        frequencyPenalty: props.playgroundPrompt.frequencyPenalty[0].toString(),
+        presencePenalty: props.playgroundPrompt.presencePenalty[0].toString()
     };
 
     fetch(requestUrl, {
@@ -292,29 +294,29 @@ export function handleSavingPrompt(
         // If prompt with the same id exists, update it
         promptsArray[existingPromptIndex] = {
             id: props.playgroundPrompt.id,
-            type: props.type,
-            model: props.llmModel,
-            system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
+            type: props.playgroundPrompt.type,
+            model: props.playgroundPrompt.model,
+            system_message: props.playgroundPrompt.system_message, // Assuming systemMessage is passed as a prop
             messages: messages,
-            temperature: props.tempValue[0].toString(),
-            maxLength: props.maxLengthValue[0].toString(),
-            topP: props.topPValue[0].toString(),
-            frequencyPenalty: props.freqPenaltyValue[0].toString(),
-            presencePenalty: props.presencePenaltyValue[0].toString()
+            temperature: props.playgroundPrompt.temperature,
+            maxLength: props.playgroundPrompt.maxLength,
+            topP: props.playgroundPrompt.topP,
+            frequencyPenalty: props.playgroundPrompt.frequencyPenalty,
+            presencePenalty: props.playgroundPrompt.presencePenalty
         };
     } else {
         // If prompt with the same id doesn't exist, append the new one
-        const requestData: Prompt = {
+        const requestData = {
             id: promptsArray.length + 1,
-            type: props.type,
-            model: props.llmModel,
-            system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
+            type: props.playgroundPrompt.type,
+            model: props.playgroundPrompt.model,
+            system_message: props.playgroundPrompt.system_message, // Assuming systemMessage is passed as a prop
             messages: messages,
-            temperature: props.tempValue[0].toString(),
-            maxLength: props.maxLengthValue[0].toString(),
-            topP: props.topPValue[0].toString(),
-            frequencyPenalty: props.freqPenaltyValue[0].toString(),
-            presencePenalty: props.presencePenaltyValue[0].toString()
+            temperature: props.playgroundPrompt.temperature,
+            maxLength: props.playgroundPrompt.maxLength,
+            topP: props.playgroundPrompt.topP,
+            frequencyPenalty: props.playgroundPrompt.frequencyPenalty,
+            presencePenalty: props.playgroundPrompt.presencePenalty
         };
         promptsArray.push(requestData);
     }
@@ -339,28 +341,21 @@ export function handleResetPrompt(
 
     const prompt: Prompt = {
         id: promptsArray.length + 1,
-        type: "",
-        model: "gpt-3.5-turbo",
+        type: props.playgroundPrompt.type,
+        model: props.playgroundPrompt.model,
         system_message: "",
         messages: [],
-        temperature: "",
-        maxLength: "",
-        topP: "",
-        frequencyPenalty: "",
-        presencePenalty: "",
+        temperature: [0.9],
+        maxLength: [256],
+        topP: [0.9],
+        frequencyPenalty: [1],
+        presencePenalty: [1],
     }
 
 
     sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
 
     props.setPlaygroundPrompt(prompt);
-    props.setSystemMessage(prompt.system_message);
-    props.setLLMModel(prompt.model);
-    props.setTempValue([0.56])
-    props.setMaxLengthValue([256]);
-    props.setTopPValue([0.9])
-    props.setFreqPenaltyValue([0.9])
-    props.setPresencePenaltyValue([1])
     setMessages(emptyMessages);
 }
 

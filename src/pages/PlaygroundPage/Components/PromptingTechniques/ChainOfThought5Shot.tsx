@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 // Icons
 import { MinusCircledIcon, PlusCircledIcon} from "@radix-ui/react-icons";
@@ -11,7 +11,7 @@ import {Button} from "@/components/ui/button.tsx";
 import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import { ChainOfThoughtMessage, PromptTabProps } from "@/lib/types.ts";
+import { ChainOfThoughtMessage, Prompt, PromptTabProps } from "@/lib/types.ts";
 
 import {
     handleCompareNavigation, handleResetPrompt,
@@ -123,6 +123,16 @@ export default function ChainOfThought(props: PromptTabProps) {
     // const [errorMessage, setErrorMessage] = useState("");
 
     const MAX_THOUGHTS_LIMIT = 5;
+
+    useEffect(() => {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...props.playgroundPrompt,
+            messages: messages
+        }
+
+        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }, [messages])
+
 
     const handleMessageChange = (index: number, value: string) => {
         const newMessages = messages.map((message, i) => {

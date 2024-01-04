@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 // SHADCN Components
 import {Textarea} from "@/components/ui/textarea.tsx";
@@ -42,11 +42,11 @@ const PromptTabs: React.FC<PromptTabProps> = (props) => {
         'react': ReactPrompting,
     };
 
-    const ActiveTabComponent = tabComponents[props.type];
+    const ActiveTabComponent = tabComponents[props.playgroundPrompt.type];
 
     // Debugging: Log if the ActiveTabComponent is not found
     if (!ActiveTabComponent) {
-        console.error(`No component found for type: ${props.type}`);
+        console.error(`No component found for type: ${props.playgroundPrompt.type}`);
     }
 
     return (
@@ -81,15 +81,15 @@ export default function PlaygroundPage(props: PageProps) {
 
             const prompt: Prompt = {
                 id: promptsArray.length + 1,
-                type: "",
+                type: "one-shot",
                 model: "",
                 system_message: "",
                 messages: [],
-                temperature: "",
-                maxLength: "",
-                topP: "",
-                frequencyPenalty: "",
-                presencePenalty: "",
+                temperature: [0.56],
+                maxLength: [256],
+                topP: [0.9],
+                frequencyPenalty: [1],
+                presencePenalty: [1],
             }
 
             sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
@@ -98,29 +98,110 @@ export default function PlaygroundPage(props: PageProps) {
         }
     });
 
-    const [activeTab, setActiveTab] = useState(playgroundPrompt.type ? playgroundPrompt.type : "one-shot");
+    // const [activeTab, setActiveTab] = useState(playgroundPrompt.type ? playgroundPrompt.type : "one-shot");
 
-    const [systemMessage, setSystemMessage] = useState(playgroundPrompt.system_message ? playgroundPrompt.system_message : "");
+    // const [systemMessage, setSystemMessage] = useState(playgroundPrompt.system_message ? playgroundPrompt.system_message : "");
 
-    const [topPValue, setTopPValue] = useState(playgroundPrompt.topP ? [Number(playgroundPrompt.topP)] : [0.9]);
+    // const [topPValue, setTopPValue] = useState(playgroundPrompt.topP ? [Number(playgroundPrompt.topP)] : [0.9]);
 
-    const [freqPenaltyValue, setFreqPenaltyValue] = useState(playgroundPrompt.frequencyPenalty ? [Number(playgroundPrompt.frequencyPenalty)] : [0.9])
+    // const [freqPenaltyValue, setFreqPenaltyValue] = useState(playgroundPrompt.frequencyPenalty ? [Number(playgroundPrompt.frequencyPenalty)] : [0.9])
 
-    const [presencePenaltyValue, setPresencePenaltyValue] = useState(playgroundPrompt.presencePenalty ? [Number(playgroundPrompt.presencePenalty)] : [1])
+    // const [presencePenaltyValue, setPresencePenaltyValue] = useState(playgroundPrompt.presencePenalty ? [Number(playgroundPrompt.presencePenalty)] : [1])
 
-    const [tempValue, setTempValue] = useState(playgroundPrompt.temperature ? [Number(playgroundPrompt.temperature)] : [0.56]);
+    // const [tempValue, setTempValue] = useState(playgroundPrompt.temperature ? [Number(playgroundPrompt.temperature)] : [0.56]);
 
-    const [maxLengthValue, setMaxLengthValue] = useState(playgroundPrompt.maxLength ? [Number(playgroundPrompt.maxLength)] : [256]);
+    // const [maxLengthValue, setMaxLengthValue] = useState(playgroundPrompt.maxLength ? [Number(playgroundPrompt.maxLength)] : [256]);
 
-    const [llmModel, setLLMModel] = useState(playgroundPrompt.model ? playgroundPrompt.model : "gpt-3.5-turbo");
+    // const [llmModel, setLLMModel] = useState(playgroundPrompt.model ? playgroundPrompt.model : "gpt-3.5-turbo");
 
-    const handleSelectChange = (tabName: string) => {
-        setActiveTab(tabName);
+    // const handleSelectChange = (tabName: string) => {
+    //     setActiveTab(tabName);
+    // }
+
+    // const handleLLMSelect = (modelName: string) => {
+    //     setLLMModel(modelName);
+    // }
+
+    useEffect(() => {
+        sessionStorage.setItem("playgroundPrompt", JSON.stringify(playgroundPrompt));
+    }, [playgroundPrompt])
+
+
+    function handleLLMSelect(value: string) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            model: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
     }
 
-    const handleLLMSelect = (modelName: string) => {
-        setLLMModel(modelName);
+
+    function handlePromptingTechnique(value: string) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            type: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
     }
+
+    function handleSystemMessageChange(value: string) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            system_message: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }
+
+
+    function handleTemperatureChange(value: number[]) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            temperature: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }
+
+
+    function handleMaxLengthChange(value: number[]) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            maxLength: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }
+
+    function handleFrequencyPenaltyChange(value: number[]) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            frequencyPenalty: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }
+
+    function handleTopPChange(value: number[]) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            topP: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }
+
+    function handlePresencePenalty(value: number[]) {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...playgroundPrompt,
+            presencePenalty: value
+        }
+
+        setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }
+
 
     return (
         <>
@@ -143,7 +224,7 @@ export default function PlaygroundPage(props: PageProps) {
                             </Select>
                         </div>
                         <div className="">
-                            <Select onValueChange={handleSelectChange}>
+                            <Select onValueChange={handlePromptingTechnique}>
                                 <SelectTrigger className="w-[200px]">
                                     <SelectValue placeholder="Prompting Techniques"/>
                                 </SelectTrigger>
@@ -166,14 +247,14 @@ export default function PlaygroundPage(props: PageProps) {
                     <div className="container h-full py-2">
                         <div className="grid h-full items-stretch gap-6 md:grid-cols-[1fr_200px]">
                             <div className="hidden flex-col space-y-4 sm:flex md:order-2">
-                                <TemperatureSelector tempValue={tempValue} setTempValue={setTempValue}/>
-                                <MaxLengthSelector maxLengthValue={maxLengthValue}
-                                                   setMaxLengthValue={setMaxLengthValue}/>
-                                <TopPSelector topPValue={topPValue} setTopPValue={setTopPValue}/>
-                                <FrequencyPenaltySelector freqPenaltyValue={freqPenaltyValue}
-                                                          setFreqPenaltyValue={setFreqPenaltyValue}/>
-                                <PresencePenaltySelector presencePenaltyValue={presencePenaltyValue}
-                                                         setPresencePenaltyValue={setPresencePenaltyValue}/>
+                                <TemperatureSelector tempValue={playgroundPrompt.temperature} setTempValue={handleTemperatureChange}/>
+                                <MaxLengthSelector maxLengthValue={playgroundPrompt.maxLength}
+                                                   setMaxLengthValue={handleMaxLengthChange}/>
+                                <TopPSelector topPValue={playgroundPrompt.topP} setTopPValue={handleTopPChange}/>
+                                <FrequencyPenaltySelector freqPenaltyValue={playgroundPrompt.frequencyPenalty}
+                                                          setFreqPenaltyValue={handleFrequencyPenaltyChange}/>
+                                <PresencePenaltySelector presencePenaltyValue={playgroundPrompt.presencePenalty}
+                                                         setPresencePenaltyValue={handlePresencePenalty}/>
                             </div>
                             <div className="md:order-1">
                                 <div className="mt-0 border-0 p-0">
@@ -184,11 +265,12 @@ export default function PlaygroundPage(props: PageProps) {
                                                     <Label htmlFor="input" className="px-3 py-2">System Message</Label>
                                                     <Textarea
                                                         id="input"
-                                                        value={systemMessage}
-                                                        onChange={(e) => setSystemMessage(e.target.value)}
+                                                        value={playgroundPrompt.system_message}
+                                                        onChange={(e) => handleSystemMessageChange(e.target.value)}
                                                         placeholder="You are a helpful assistant."
                                                         className="flex-1 lg:min-h-[540px]"
-                                                    >System Message </Textarea>
+                                                    >
+                                                    </Textarea>
                                                 </div>
                                             </div>
                                             {/* User Messages and Assistant Responses*/}
@@ -198,21 +280,6 @@ export default function PlaygroundPage(props: PageProps) {
                                                     setActivePage={props.setActivePage}
                                                     playgroundPrompt={playgroundPrompt}
                                                     setPlaygroundPrompt={setPlaygroundPrompt}
-                                                    llmModel={llmModel}
-                                                    setLLMModel={setLLMModel}
-                                                    type={activeTab}
-                                                    systemMessage={systemMessage}
-                                                    setSystemMessage={setSystemMessage}
-                                                    tempValue={tempValue}
-                                                    setTempValue={setTempValue}
-                                                    maxLengthValue={maxLengthValue}
-                                                    setMaxLengthValue={setMaxLengthValue}
-                                                    topPValue={topPValue}
-                                                    setTopPValue={setTopPValue}
-                                                    freqPenaltyValue={freqPenaltyValue}
-                                                    setFreqPenaltyValue={setFreqPenaltyValue}
-                                                    presencePenaltyValue={presencePenaltyValue}
-                                                    setPresencePenaltyValue={setPresencePenaltyValue}
                                                 />
                                             </div>
                                         </div>

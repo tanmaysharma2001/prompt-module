@@ -4,11 +4,11 @@ export interface Prompt {
     model: string;
     system_message: string;
     messages: any[];
-    temperature: string;
-    maxLength: string;
-    topP: string;
-    frequencyPenalty: string;
-    presencePenalty: string;
+    temperature: number[];
+    maxLength: number[];
+    topP: number[];
+    frequencyPenalty: number[];
+    presencePenalty: number[];
 }
 
 export interface OneShotMessage {
@@ -38,21 +38,6 @@ export interface ReactPromptMessage {
 export interface PromptTabProps {
     playgroundPrompt: Prompt;
     setPlaygroundPrompt: (prompt: Prompt) => void;
-    llmModel: string;
-    setLLMModel: (model: string) => void;
-    type: string;
-    systemMessage: string;
-    setSystemMessage: (message: string) => void;
-    tempValue: number[];
-    setTempValue: (value: number[]) => void;
-    maxLengthValue: number[];
-    setMaxLengthValue: (value: number[]) => void;
-    topPValue: number[];
-    setTopPValue: (value: number[]) => void;
-    freqPenaltyValue: number[];
-    setFreqPenaltyValue: (value: number[]) => void;
-    presencePenaltyValue: number[];
-    setPresencePenaltyValue: (value: number[]) => void;
     setActivePage: (value: string) => void;
 }
 

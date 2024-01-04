@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // ShadCN Components
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button.tsx";
 import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import { PromptTabProps, ReactPromptMessage, ReactResponse } from "@/lib/types.ts";
+import { Prompt, PromptTabProps, ReactPromptMessage, ReactResponse } from "@/lib/types.ts";
 
 import {
     handleCompareNavigation,
@@ -132,6 +132,15 @@ export default function ReactPrompting(props: PromptTabProps) {
 
     const [isLoading, setIsLoading] = useState(false);
     // const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...props.playgroundPrompt,
+            messages: messages
+        }
+
+        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }, [messages])
 
     function handleMessageChange(index: number, value: string) {
         const newMessages = messages.map((message, i) => {

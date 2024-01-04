@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 // Icons
@@ -13,7 +13,7 @@ import {ScrollArea} from "@/components/ui/scroll-area.tsx"
 import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import { OneShotMessage, PromptTabProps} from "@/lib/types.ts";
+import { OneShotMessage, Prompt, PromptTabProps} from "@/lib/types.ts";
 
 // Utilities Functions
 import {
@@ -69,6 +69,18 @@ export default function OneShot(props: PromptTabProps) {
     // const [errorMessage, setErrorMessage] = useState("");
 
     const { toast } = useToast();
+
+    // Save Changes to Playground Prompt when there is a change in
+    // messages
+    useEffect(() => {
+        const updatedPlaygroundPrompt: Prompt = {
+            ...props.playgroundPrompt,
+            messages: messages
+        }
+
+        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    }, [messages])
+    
 
     const handleMessageChange = (index: number, value: string) => {
         const newMessages = messages.map((message, i) => {
