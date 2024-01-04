@@ -1,14 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 
 // ShadCN Components
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { MinusCircledIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button.tsx";
 
+// Other Components
+import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import { Prompt, PromptTabProps, ReactPromptMessage, ReactResponse } from "@/lib/types.ts";
+import { PromptTabProps, ReactPromptMessage, ReactResponse } from "@/lib/types.ts";
+
+import {
+    handleCompareNavigation,
+    handleResetPrompt,
+    handleSavingPrompt,
+    sendingReactPromptRequest
+} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 import {useToast} from "@/components/ui/use-toast.ts";
 
 const REACT_PROMPT_COMPLETION_URL = import.meta.env.VITE_REACT_PROMPT_COMPLETION_URL;
@@ -111,8 +119,6 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 
 export default function ReactPrompting(props: PromptTabProps) {
 
-    const { toast } = useToast();
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -122,11 +128,10 @@ export default function ReactPrompting(props: PromptTabProps) {
         reactResponses: null
     }]);
 
-    const navigate = useNavigate();
+    const { toast } = useToast();
 
-    useEffect(() => {
-        console.log(messages);
-    }, []);
+    const [isLoading, setIsLoading] = useState(false);
+    // const [errorMessage, setErrorMessage] = useState("");
 
     function handleMessageChange(index: number, value: string) {
         const newMessages = messages.map((message, i) => {
@@ -238,28 +243,6 @@ export default function ReactPrompting(props: PromptTabProps) {
             return;
         }
 
-        // Step 1: Check if there is an existing array in local storage
-        const existingKeys = localStorage.getItem('apiKeys');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let keysArray = existingKeys ? JSON.parse(existingKeys) : [];
-
-        if (keysArray.length === 0) {
-            alert("You don't have any API Key Stored!");
-            return;
-        }
-
-        const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.llmModel);
-
-        if (!KeyObject) {
-            alert("You don't have the API Key for the model selected.");
-            return;
-        }
-
-        const api_key = KeyObject.api_key;
-
-        setIsSubmitting(true);
-
         const UserMessage = messages.map((message) => {
             if (message.type === 'USER') {
                 return "USER: " + message.message + "\n";
@@ -268,167 +251,50 @@ export default function ReactPrompting(props: PromptTabProps) {
             }
         });
 
-        const requestData = {
-            api_key: api_key,
-            model: props.llmModel,
-            system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-            user_message: UserMessage.join(""),
-            temperature: props.tempValue[0].toString(),
-            maxLength: props.maxLengthValue[0].toString(),
-            topP: props.topPValue[0].toString(),
-            frequencyPenalty: props.freqPenaltyValue[0].toString(),
-            presencePenalty: props.presencePenaltyValue[0].toString()
-        };
 
-        fetch(REACT_PROMPT_COMPLETION_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.message === undefined) {
-                    throw new Error('Invalid response from the server');
-                }
-
-                const input = data.message;
-
-                // Define the regular expressions for each field
-                const thoughtRegex = /Thought: (.+?)\n/;
-                const actionRegex = /Action: (.+?)\n/;
-                const observationRegex = /Observation: (.+?)\n/;
-
-                // Extract the values using the regex match function
-                const thoughtMatch = input.match(thoughtRegex);
-                const actionMatch = input.match(actionRegex);
-                const observationMatch = input.match(observationRegex);
-
-                // Extract the first capturing group if the match is successful, else default to an empty string
-                const thought = thoughtMatch ? thoughtMatch[1] : "";
-                const action = actionMatch ? actionMatch[1] : "";
-                const observation = observationMatch ? observationMatch[1] : "";
-
-                setMessages([
-                    ...messages,
-                    {
-                        type: "ASSISTANT",
-                        message: "",
-                        reactResponses: {
-                            thought: thought,
-                            act: action,
-                            observation: observation
-                        }
-                    }
-                ]);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+        sendingReactPromptRequest(
+            REACT_PROMPT_COMPLETION_URL,
+            props,
+            UserMessage.join(""),
+            setIsLoading,
+            setIsSubmitting,
+            setMessages,
+            messages
+        )
     }
 
     function handleSave() {
-        if (isSaving) return;
-
-        setIsSaving(true);
-
-        // Step 1: Check if there is an existing array in local storage
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        // Check if a prompt with the same id already exists
-        const existingPromptIndex = promptsArray.findIndex((prompt: Prompt) => prompt.id === props.playgroundPrompt.id);
-
-        if (existingPromptIndex !== -1) {
-            // If prompt with the same id exists, update it
-            promptsArray[existingPromptIndex] = {
-                id: props.playgroundPrompt.id,
-                type: props.type,
-                model: props.llmModel,
-                system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-                messages: messages,
-                temperature: props.tempValue[0].toString(),
-                maxLength: props.maxLengthValue[0].toString(),
-                topP: props.topPValue[0].toString(),
-                frequencyPenalty: props.freqPenaltyValue[0].toString(),
-                presencePenalty: props.presencePenaltyValue[0].toString()
-            };
-        } else {
-            // If prompt with the same id doesn't exist, append the new one
-            const requestData: Prompt = {
-                id: promptsArray.length + 1,
-                type: props.type,
-                model: props.llmModel,
-                system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-                messages: messages,
-                temperature: props.tempValue[0].toString(),
-                maxLength: props.maxLengthValue[0].toString(),
-                topP: props.topPValue[0].toString(),
-                frequencyPenalty: props.freqPenaltyValue[0].toString(),
-                presencePenalty: props.presencePenaltyValue[0].toString()
-            };
-            promptsArray.push(requestData);
+        if(handleSavingPrompt(
+            isSaving,
+            messages,
+            setIsSaving,
+            props
+        )) {
+            toast({
+                title: "Prompt Saved!"
+            })
         }
-
-        // Step 4: Save the updated array back to local storage
-        localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
-
-        toast({
-            title: "Prompt Saved!"
-        })
-
-        setIsSaving(false);
+        else {
+            toast({
+                title: "Error occurred while saving the prompt."
+            })
+        }
     }
 
     function handleCompare() {
-        navigate('/compare')
+        handleCompareNavigation(props)
     }
 
     function handleReset() {
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        const prompt: Prompt = {
-            id: promptsArray.length + 1,
-            type: "",
-            model: "",
-            system_message: "",
-            messages: [],
-            temperature: "",
-            maxLength: "",
-            topP: "",
-            frequencyPenalty: "",
-            presencePenalty: "",
-        }
-
-
-        sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
-
-        props.setPlaygroundPrompt(prompt);
-        props.setSystemMessage(prompt.system_message);
-        props.setLLMModel(prompt.model);
-        props.setTempValue([0.56])
-        props.setMaxLengthValue([256]);
-        props.setTopPValue([0.9])
-        props.setFreqPenaltyValue([0.9])
-        props.setPresencePenaltyValue([1])
-        setMessages([{
-            type: "USER",
-            message: "",
-            reactResponses: null
-        }]);
+        handleResetPrompt(
+            props,
+            setMessages,
+            [{
+                type: "USER",
+                message: "",
+                reactResponses: null
+            }]
+        )
     }
 
 
@@ -450,6 +316,7 @@ export default function ReactPrompting(props: PromptTabProps) {
                             onObservationChange={(e) => handleObservationChange(index, e.target.value)}
                         />
                     ))}
+                    {isLoading ? <LoadingSpinner/> : <></>}
                     <div className="text-left hover:bg-gray-100 p-2">
                         <button className="ml-4 flex text-sm font-medium items-center space-x-2 p-2 rounded-md"
                             onClick={addMessageComponent}>

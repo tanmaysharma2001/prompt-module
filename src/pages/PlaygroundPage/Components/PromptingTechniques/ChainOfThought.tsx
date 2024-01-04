@@ -1,16 +1,31 @@
 import {useState} from "react";
 
 // Icons
-import {MinusCircledIcon, PlusCircledIcon} from "@radix-ui/react-icons";
+import {
+    MinusCircledIcon,
+    PlusCircledIcon
+} from "@radix-ui/react-icons";
 
-// SHADCN Components
+// ShadCN Components
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import {Button} from "@/components/ui/button.tsx";
 
+// Other Components
+import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import {ChainOfThoughtMessage, Prompt, PromptTabProps} from "@/lib/types.ts";
-import {useNavigate} from "react-router-dom";
+import {
+    ChainOfThoughtMessage,
+    PromptTabProps
+} from "@/lib/types.ts";
+
+// Utilities Functions
+import {
+    handleCompareNavigation,
+    handleResetPrompt,
+    handleSavingPrompt,
+    sendingChainOfThoughtRequest,
+} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 import {useToast} from "@/components/ui/use-toast.ts";
 
 const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
@@ -27,15 +42,15 @@ interface MessageComponentProps {
 }
 
 const MessageComponent: React.FC<MessageComponentProps> = ({
-                              type,
-                              message,
-                              deleteMessage,
-                              onMessageChange,
-                              thoughts,
-                              onThoughtChange,
-                              onAddThought,
-                              deleteThought
-                          }) => {
+                                                               type,
+                                                               message,
+                                                               deleteMessage,
+                                                               onMessageChange,
+                                                               thoughts,
+                                                               onThoughtChange,
+                                                               onAddThought,
+                                                               deleteThought
+                                                           }) => {
     return (
         <>
             <div id={"userMessageComponent"} className={"border-b-[1px] border-gray-300"}>
@@ -91,7 +106,6 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 };
 
 
-
 export default function ChainOfThought(props: PromptTabProps) {
 
     const { toast } = useToast();
@@ -101,11 +115,18 @@ export default function ChainOfThought(props: PromptTabProps) {
     const [isSaving, setIsSaving] = useState(false);
 
 
-    const [messages, setMessages] = useState<ChainOfThoughtMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{type: "USER", message: "", thoughts: ["", "", ""]}]);
+    const [messages, setMessages] = useState<ChainOfThoughtMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{
+        type: "USER",
+        message: "",
+        thoughts: ["", "", ""]
+    }]);
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Will be used for personalised alert messages!
+    // const [errorMessage, setErrorMessage] = useState("");
 
     const MAX_THOUGHTS_LIMIT = 10;
-
-    const navigate = useNavigate();
 
     const handleMessageChange = (index: number, value: string) => {
         const newMessages = messages.map((message, i) => {
@@ -181,124 +202,36 @@ export default function ChainOfThought(props: PromptTabProps) {
             return;
         }
 
-        // Step 1: Check if there is an existing array in local storage
-        const existingKeys = localStorage.getItem('apiKeys');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let keysArray = existingKeys ? JSON.parse(existingKeys) : [];
-
-        if (keysArray.length === 0) {
-            alert("You don't have any API Key Stored!");
-            return ;
-        }
-
-        const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.llmModel);
-
-        if(!KeyObject) {
-            alert("You don't have the API Key for the model selected.");
-            return ;
-        }
-
-        const api_key = KeyObject.api_key;
-
-        setIsSubmitting(true);
-
         const changedUserMessage = lastMessage.thoughts?.join('\n') + lastMessage.message;
 
-        const requestData = {
-            api_key: api_key,
-            model: props.llmModel,
-            system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-            user_message: changedUserMessage,
-            temperature: props.tempValue[0].toString(),
-            maxLength: props.maxLengthValue[0].toString(),
-            topP: props.topPValue[0].toString(),
-            frequencyPenalty: props.freqPenaltyValue[0].toString(),
-            presencePenalty: props.presencePenaltyValue[0].toString()
-        };
-
-        fetch(PROMPT_COMPLETION_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.message === undefined) {
-                    throw new Error('Invalid response from the server');
-                }
-                setMessages([...messages, {type: "ASSISTANT", message: data.message, thoughts: null}]);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+        sendingChainOfThoughtRequest(
+            PROMPT_COMPLETION_URL,
+            props,
+            changedUserMessage,
+            setIsLoading,
+            setIsSubmitting,
+            setMessages,
+            messages
+        )
     };
 
 
     const handleSave = () => {
-        if (isSaving) return;
-
-        setIsSaving(true);
-
-        // Step 1: Check if there is an existing array in local storage
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        // Check if a prompt with the same id already exists
-        const existingPromptIndex = promptsArray.findIndex((prompt: Prompt) => prompt.id === props.playgroundPrompt.id);
-
-        if (existingPromptIndex !== -1) {
-            // If prompt with the same id exists, update it
-            promptsArray[existingPromptIndex] = {
-                id: props.playgroundPrompt.id,
-                type: props.type,
-                model: props.llmModel,
-                system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-                messages: messages,
-                temperature: props.tempValue[0].toString(),
-                maxLength: props.maxLengthValue[0].toString(),
-                topP: props.topPValue[0].toString(),
-                frequencyPenalty: props.freqPenaltyValue[0].toString(),
-                presencePenalty: props.presencePenaltyValue[0].toString()
-            };
-        } else {
-            // If prompt with the same id doesn't exist, append the new one
-            const requestData: Prompt = {
-                id: promptsArray.length + 1,
-                type: props.type,
-                model: props.llmModel,
-                system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-                messages: messages,
-                temperature: props.tempValue[0].toString(),
-                maxLength: props.maxLengthValue[0].toString(),
-                topP: props.topPValue[0].toString(),
-                frequencyPenalty: props.freqPenaltyValue[0].toString(),
-                presencePenalty: props.presencePenaltyValue[0].toString()
-            };
-            promptsArray.push(requestData);
+        if(handleSavingPrompt(
+            isSaving,
+            messages,
+            setIsSaving,
+            props
+        )) {
+            toast({
+                title: "Prompt Saved!"
+            })
         }
-
-        // Step 4: Save the updated array back to local storage
-        localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
-
-        toast({
-            title: "Prompt Saved!"
-        })
-
-        setIsSaving(false);
-
+        else {
+            toast({
+                title: "Error occurred while saving the prompt."
+            })
+        }
     }
 
 
@@ -320,46 +253,22 @@ export default function ChainOfThought(props: PromptTabProps) {
                         ...message,
                         thoughts: message.thoughts ? [...message.thoughts, ""] : [""], // Append new thought
                     }
-                    : message // Return unaltered message for other indices
+                    : message
             )
         );
     };
 
 
     function handleReset() {
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        const prompt: Prompt = {
-            id: promptsArray.length + 1,
-            type: "",
-            model: "",
-            system_message: "",
-            messages: [],
-            temperature: "",
-            maxLength: "",
-            topP: "",
-            frequencyPenalty: "",
-            presencePenalty: "",
-        }
-
-
-        sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
-
-        props.setPlaygroundPrompt(prompt);
-        props.setSystemMessage(prompt.system_message);
-        props.setLLMModel(prompt.model);
-        props.setTempValue([0.56])
-        props.setMaxLengthValue([256]);
-        props.setTopPValue([0.9])
-        props.setFreqPenaltyValue([0.9])
-        props.setPresencePenaltyValue([1])
-        setMessages([{type: "USER", message: "", thoughts: ["", "", ""]}]);
+        handleResetPrompt(
+            props,
+            setMessages,
+            [{type: "USER", message: "", thoughts: ["", "", ""]}]
+        );
     }
 
     function handleCompare() {
-        navigate('/compare');
+        handleCompareNavigation(props);
     }
 
 
@@ -370,11 +279,9 @@ export default function ChainOfThought(props: PromptTabProps) {
                     {messages.map((message, index) => (
                         <MessageComponent
                             key={index}
-                            // userMessage={message.userMessage}
                             message={message.message}
                             type={message.type}
                             thoughts={message.thoughts}
-                            // assistantResponse={message.assistantResponse}
                             onMessageChange={(e) => handleMessageChange(index, e.target.value)}
                             deleteMessage={() => handleMessageDelete(index)}
                             onThoughtChange={(e, thoughtIndex) => handleThoughtChange(index, thoughtIndex, e.target.value)}
@@ -382,6 +289,7 @@ export default function ChainOfThought(props: PromptTabProps) {
                             deleteThought={(thoughtIndex) => deleteThought(index, thoughtIndex)}
                         />
                     ))}
+                    {isLoading ? <LoadingSpinner/> : <></>}
                     <div className="text-left hover:bg-gray-100 p-2">
                         <button className="ml-4 flex text-sm font-medium items-center space-x-2 p-2 rounded-md"
                                 onClick={addMessageComponent}>

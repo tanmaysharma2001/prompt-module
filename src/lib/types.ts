@@ -53,6 +53,7 @@ export interface PromptTabProps {
     setFreqPenaltyValue: (value: number[]) => void;
     presencePenaltyValue: number[];
     setPresencePenaltyValue: (value: number[]) => void;
+    setActivePage: (value: string) => void;
 }
 
 export interface APIKey {

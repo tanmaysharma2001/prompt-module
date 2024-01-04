@@ -1,13 +1,12 @@
-import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion.tsx"
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion.tsx"
 import {Badge} from "@/components/ui/badge.tsx";
 import {Button} from "@/components/ui/button.tsx";
 
 
 // Types
-import {ChainOfThoughtMessage, OneShotMessage, Prompt} from "@/lib/types.ts";
+import {ChainOfThoughtMessage, OneShotMessage, Prompt } from "@/lib/types.ts";
 
 // Properly renders the Prompt Message
 interface PromptRendererProps {
@@ -54,11 +53,10 @@ const renderChainOfThoughtMessage = (message: ChainOfThoughtMessage) => (
 interface PromptsListProps {
     prompts: Prompt[];
     setPrompts: (value: Prompt[]) => void;
+    setActivePage: (value: string) => void;
 }
 
-const PromptsList: React.FC<PromptsListProps> = ({prompts, setPrompts}) => {
-
-    const navigate = useNavigate();
+const PromptsList: React.FC<PromptsListProps> = ({prompts, setPrompts, setActivePage }) => {
 
     function handleDeletePrompt(promptToDelete: Prompt) {
         setPrompts(prompts.filter((prompt) => prompt.id !== promptToDelete.id));
@@ -68,11 +66,13 @@ const PromptsList: React.FC<PromptsListProps> = ({prompts, setPrompts}) => {
     // Navigate to PlaygroundPage.
     function handlePlaygroundNavigation(prompt: Prompt) {
         sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
-        navigate("/");
+        // navigate("/");
+        setActivePage("Playground");
     }
 
     function handleCompareNavigation() {
-        navigate("/compare");
+        // navigate("/compare");
+        setActivePage("Compare");
     }
 
     return (
@@ -114,8 +114,11 @@ const PromptsList: React.FC<PromptsListProps> = ({prompts, setPrompts}) => {
     );
 }
 
+interface PageProps {
+    setActivePage: (value: string) => void;
+}
 
-export default function SavedPromptsPage() {
+export default function SavedPromptsPage(props: PageProps) {
 
     const [prompts, setPrompts] = useState<Prompt[]>(() => {
         const promptsJson = localStorage.getItem("savedPrompts");
@@ -135,14 +138,14 @@ export default function SavedPromptsPage() {
     }, [prompts]);
 
     return (
-        <div className={"m-20 ml-40 mr-40"}>
+        <div className={"m-5 ml-10 mr-10"}>
             <div className={"flex flex-row m-6"}>
                 <div>Prompts {"->"}</div>
                 <div>
-                    <Badge className={"inline-block"} variant="outline">Saved</Badge>
+                    <Badge className={"inline-block ml-2 "} variant="outline">Saved</Badge>
                 </div>
             </div>
-            <PromptsList prompts={prompts} setPrompts={setPrompts}/>
+            <PromptsList prompts={prompts} setPrompts={setPrompts} setActivePage={props.setActivePage}/>
         </div>
     );
 }

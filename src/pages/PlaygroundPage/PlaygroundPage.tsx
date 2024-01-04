@@ -61,7 +61,11 @@ const PromptTabs: React.FC<PromptTabProps> = (props) => {
 }
 
 
-export default function PlaygroundPage() {
+interface PageProps {
+    setActivePage: (value: string) => void;
+}
+
+export default function PlaygroundPage(props: PageProps) {
 
     const [playgroundPrompt, setPlaygroundPrompt] = useState<Prompt>(() => {
         const playgroundPrompt = sessionStorage.getItem("playgroundPrompt");
@@ -87,6 +91,8 @@ export default function PlaygroundPage() {
                 frequencyPenalty: "",
                 presencePenalty: "",
             }
+
+            sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
 
             return prompt;
         }
@@ -124,7 +130,7 @@ export default function PlaygroundPage() {
                 <div
                     className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
                     <div className="flex flex-row mr-auto w-full space-x-3">
-                        <h2 className="mt-1 text-lg font-semibold">Playground</h2>
+                        <h2 className="mt-1 text-lg font-semibold">Lyzr Prompt Playground</h2>
                         <div className="">
                             <Select onValueChange={handleLLMSelect}>
                                 <SelectTrigger className="w-[160px]">
@@ -189,6 +195,7 @@ export default function PlaygroundPage() {
                                             <div
                                                 className="col-span-2 flex flex-col justify-between space-y-4 mt-[5px] min-h-[540px] lg:min-h-[540px]">
                                                 <PromptTabs
+                                                    setActivePage={props.setActivePage}
                                                     playgroundPrompt={playgroundPrompt}
                                                     setPlaygroundPrompt={setPlaygroundPrompt}
                                                     llmModel={llmModel}

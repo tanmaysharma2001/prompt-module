@@ -1,5 +1,4 @@
-import {useState} from "react";
-import {useNavigate} from "react-router-dom";
+import { useState } from "react";
 
 
 // Icons
@@ -9,14 +8,22 @@ import {MinusCircledIcon} from "@radix-ui/react-icons";
 // SHADCN Components
 import {Button} from "@/components/ui/button.tsx";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx"
-import { useToast } from "@/components/ui/use-toast";
 
+// Other Components
+import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import {Prompt, OneShotMessage, PromptTabProps} from "@/lib/types.ts";
+import { OneShotMessage, PromptTabProps} from "@/lib/types.ts";
+
+// Utilities Functions
+import {
+    handleCompareNavigation, handleResetPrompt,
+    handleSavingPrompt,
+    sendingOneShotRequest
+} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
+import {useToast} from "@/components/ui/use-toast.ts";
 
 const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
-
 
 interface MessageComponentProps {
     type: string; // assuming type is a string, adjust as necessary
@@ -50,15 +57,18 @@ const MessageComponent: React.FC<MessageComponentProps> = ({type, message, onMes
 
 export default function OneShot(props: PromptTabProps) {
 
-    const { toast } = useToast();
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const [messages, setMessages] = useState<OneShotMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{type: "USER", message: ""}]);
+    const [messages, setMessages] = useState<OneShotMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{
+        type: "USER",
+        message: ""
+    }]);
 
-    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    // const [errorMessage, setErrorMessage] = useState("");
 
+    const { toast } = useToast();
 
     const handleMessageChange = (index: number, value: string) => {
         const newMessages = messages.map((message, i) => {
@@ -88,6 +98,7 @@ export default function OneShot(props: PromptTabProps) {
         }
     };
 
+
     const handleSubmit = () => {
 
         if (isSubmitting) return;
@@ -104,167 +115,47 @@ export default function OneShot(props: PromptTabProps) {
             return;
         }
 
-        // Step 1: Check if there is an existing array in local storage
-        const existingKeys = localStorage.getItem('apiKeys');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let keysArray = existingKeys ? JSON.parse(existingKeys) : [];
-
-        if (keysArray.length === 0) {
-            alert("You don't have any API Key Stored!");
-            return;
-        }
-
-        const KeyObject = keysArray.find((key: { model: string, key: string }) => key.model === props.llmModel);
-
-        if (!KeyObject) {
-            alert("You don't have the API Key for the model selected.");
-            return;
-        }
-
-        const api_key = KeyObject.api_key;
-
-        setIsSubmitting(true);
-
-        const requestData = {
-            api_key: api_key,
-            model: props.llmModel,
-            system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-            user_message: lastMessage.message,
-            temperature: props.tempValue[0].toString(),
-            maxLength: props.maxLengthValue[0].toString(),
-            topP: props.topPValue[0].toString(),
-            frequencyPenalty: props.freqPenaltyValue[0].toString(),
-            presencePenalty: props.presencePenaltyValue[0].toString()
-        };
-
-        console.log(requestData);
-
-        fetch(PROMPT_COMPLETION_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.message === undefined) {
-                    throw new Error('Invalid response from the server');
-                }
-                setMessages([...messages, {type: "ASSISTANT", message: data.message}]);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+        sendingOneShotRequest(
+            PROMPT_COMPLETION_URL,
+            props,
+            lastMessage.message.toString(),
+            setIsLoading,
+            setIsSubmitting,
+            setMessages,
+            messages,
+        );
     };
 
 
     const handleSave = () => {
-        if (isSaving) return;
-
-        if (messages.length === 0) {
-            alert("User Message doesn't exists!");
-            return;
+        if(handleSavingPrompt(
+            isSaving,
+            messages,
+            setIsSaving,
+            props
+        )) {
+            toast({
+                title: "Prompt Saved!"
+            })
         }
-
-        setIsSaving(true);
-
-
-        // Step 1: Check if there is an existing array in local storage
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        // Check if a prompt with the same id already exists
-        const existingPromptIndex = promptsArray.findIndex((prompt: Prompt) => prompt.id === props.playgroundPrompt.id);
-
-        if (existingPromptIndex !== -1) {
-            // If prompt with the same id exists, update it
-            promptsArray[existingPromptIndex] = {
-                id: props.playgroundPrompt.id,
-                type: props.type,
-                model: props.llmModel,
-                system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-                messages: messages,
-                temperature: props.tempValue[0].toString(),
-                maxLength: props.maxLengthValue[0].toString(),
-                topP: props.topPValue[0].toString(),
-                frequencyPenalty: props.freqPenaltyValue[0].toString(),
-                presencePenalty: props.presencePenaltyValue[0].toString()
-            };
-        } else {
-            // If prompt with the same id doesn't exist, append the new one
-            const requestData: Prompt = {
-                id: promptsArray.length + 1,
-                type: props.type,
-                model: props.llmModel,
-                system_message: props.systemMessage, // Assuming systemMessage is passed as a prop
-                messages: messages,
-                temperature: props.tempValue[0].toString(),
-                maxLength: props.maxLengthValue[0].toString(),
-                topP: props.topPValue[0].toString(),
-                frequencyPenalty: props.freqPenaltyValue[0].toString(),
-                presencePenalty: props.presencePenaltyValue[0].toString()
-            };
-            promptsArray.push(requestData);
+        else {
+            toast({
+                title: "Error occurred while saving the prompt."
+            })
         }
-
-        // Step 4: Save the updated array back to local storage
-        localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
-
-        toast({
-            title: "Prompt Saved!"
-        })
-
-        setIsSaving(false);
-
     }
 
 
     const handleCompare = () => {
-        navigate('/compare');
+        handleCompareNavigation(props);
     }
 
     function handleReset() {
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        const prompt: Prompt = {
-            id: promptsArray.length + 1,
-            type: "",
-            model: "",
-            system_message: "",
-            messages: [],
-            temperature: "",
-            maxLength: "",
-            topP: "",
-            frequencyPenalty: "",
-            presencePenalty: "",
-        }
-
-
-        sessionStorage.setItem("playgroundPrompt", JSON.stringify(prompt));
-
-        props.setPlaygroundPrompt(prompt);
-        props.setSystemMessage(prompt.system_message);
-        props.setLLMModel(prompt.model);
-        props.setTempValue([0.56])
-        props.setMaxLengthValue([256]);
-        props.setTopPValue([0.9])
-        props.setFreqPenaltyValue([0.9])
-        props.setPresencePenaltyValue([1])
-        setMessages([{type: "USER", message: ""}]);
+        handleResetPrompt(
+            props,
+            setMessages,
+            [{type: "USER", message: ""}]
+        )
     }
 
 
@@ -281,6 +172,7 @@ export default function OneShot(props: PromptTabProps) {
                             message={message.message}
                         />
                     ))}
+                    {isLoading ? <LoadingSpinner/> : <></>}
                     <div className="text-left hover:bg-gray-100 p-2">
                         <button className="ml-4 flex text-sm font-medium items-center space-x-2 p-2 rounded-md"
                                 onClick={addMessageComponent}>
@@ -291,9 +183,9 @@ export default function OneShot(props: PromptTabProps) {
             </div>
             <div className="flex flex-col space-y-2">
                 <div className="flex items-center space-x-2">
-                    <Button onClick={handleSubmit}>Submit</Button>
+                    <Button disabled={isLoading} onClick={handleSubmit}>Submit</Button>
                     <Button onClick={handleCompare}>Compare</Button>
-                    <Button onClick={handleSave}>Save</Button>
+                    <Button disabled={isSaving} onClick={handleSave}>Save</Button>
                     <Button onClick={handleReset}>Reset</Button>
                 </div>
             </div>
