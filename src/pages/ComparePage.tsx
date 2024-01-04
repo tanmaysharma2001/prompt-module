@@ -298,7 +298,8 @@ const TableComponent: React.FC<TableComponentProps> = ({prompts, setShowLoadingA
                         </div>
                         <div className="p-2">
                             <textarea
-                                id="systemMessage"
+                                readOnly
+                                id={"systemMessage-" + idx}
                                 value={prompt.system_message}
                                 className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                 placeholder=""
