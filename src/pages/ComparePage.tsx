@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 // Shadcn Components
 import { Button } from "@/components/ui/button.tsx";
+import {useToast} from "@/components/ui/use-toast.ts";
 
 // Types
 import { APIKey, Prompt, ReactPromptMessage } from "@/lib/types.ts";
@@ -13,7 +14,7 @@ interface UserMessagesProp {
     prompt: Prompt;
 }
 
-const REACT_PROMPT_COMPLETION_URL = import.meta.env.REACT_VITE_PROMPT_COMPLETION_URL;
+const REACT_PROMPT_COMPLETION_URL = import.meta.env.VITE_REACT_PROMPT_COMPLETION_URL;
 const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
 
 const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
@@ -122,6 +123,8 @@ interface TableComponentProps {
 
 const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoadingAlert, setPrompts, setActivePage }) => {
 
+    const { toast } = useToast();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // View Prompts: Duplicate use to modify prompts view without the need of modifying the original prompts.
@@ -180,12 +183,14 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
             model: prompt.model,
             system_message: prompt.system_message,
             user_message: UserMessage,
-            temperature: prompt.temperature,
-            maxLength: prompt.maxLength,
-            topP: prompt.topP,
-            frequencyPenalty: prompt.frequencyPenalty,
-            presencePenalty: prompt.presencePenalty,
+            temperature: prompt.temperature[0],
+            maxLength: prompt.maxLength[0],
+            topP: prompt.topP[0],
+            frequencyPenalty: prompt.frequencyPenalty[0],
+            presencePenalty: prompt.presencePenalty[0],
         };
+
+        console.log(requestData);
 
         fetch(requestURL, {
             method: 'POST',
@@ -217,14 +222,52 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
                     return promptResponse;
                 }))
 
-                setViewPrompts(viewPrompts.map((prompt, idx) => {
-                    if (idx === prompt.id) {
+                setViewPrompts(viewPrompts.map((viewPrompt) => {
+                    if (viewPrompt.id === prompt.id) {
+
+                        let newMessages;
+
+                        if (prompt.type === 'one-shot' || prompt.type === 'five-shot') {
+                            newMessages = { type: "ASSISTANT", message: data.message }
+                        } else if (prompt.type === 'chain-of-thought' || prompt.type === 'cot+5-shot') {
+                            newMessages = { type: "ASSISTANT", message: data.message, thoughts: null }
+                        } else if (prompt.type === 'react') {
+                            const input = data.message;
+
+                            // Define the regular expressions for each field
+                            const thoughtRegex = /Thought: (.+?)\n/;
+                            const actionRegex = /Action: (.+?)\n/;
+                            const observationRegex = /Observation: (.+?)\n/;
+
+                            // Extract the values using the regex match function
+                            const thoughtMatch = input.match(thoughtRegex);
+                            const actionMatch = input.match(actionRegex);
+                            const observationMatch = input.match(observationRegex);
+
+                            // Extract the first capturing group if the match is successful, else default to an empty string
+                            const thought = thoughtMatch ? thoughtMatch[1] : "";
+                            const action = actionMatch ? actionMatch[1] : "";
+                            const observation = observationMatch ? observationMatch[1] : "";
+
+                            newMessages = {
+                                type: "ASSISTANT",
+                                message: "",
+                                reactResponses: {
+                                    thought: thought,
+                                    act: action,
+                                    observation: observation
+                                }
+                            }
+                        }
+
+                        console.log(newMessages);
+
                         return {
                             ...prompt,
-                            response: data.message,
+                            messages: [...prompt.messages, newMessages]
                         }
                     }
-                    return prompt;
+                    return viewPrompt;
                 }))
 
             })
@@ -241,11 +284,14 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
 
         setPrompts(prompts.map((prompt, idx) => {
             if (idx === index) {
-                console.log(idx);
                 return viewPrompts[index];
             }
             return prompt;
         }));
+
+        toast({
+            title: "Prompt Saved!"
+        })
     }
 
     function handlePlaygroundNavigation(prompt: Prompt) {

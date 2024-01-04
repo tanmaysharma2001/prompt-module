@@ -17,7 +17,7 @@ import {
     handleSavingPrompt,
     sendingReactPromptRequest
 } from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
-import {useToast} from "@/components/ui/use-toast.ts";
+import { useToast } from "@/components/ui/use-toast.ts";
 
 const REACT_PROMPT_COMPLETION_URL = import.meta.env.VITE_REACT_PROMPT_COMPLETION_URL;
 
@@ -61,7 +61,9 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
                             <MinusCircledIcon onClick={onMessageDelete} className={"m-3 h-5 w-5 hover:bg-gray-200"} />
                         </div>
                         :
-                        <></>
+                        <>
+                            <MinusCircledIcon onClick={onMessageDelete} className={"m-3 h-5 w-5 hover:bg-gray-200"} />
+                        </>
                     }
                 </div>
                 {reactResponses ?
@@ -273,7 +275,7 @@ export default function ReactPrompting(props: PromptTabProps) {
     }
 
     function handleSave() {
-        if(handleSavingPrompt(
+        if (handleSavingPrompt(
             isSaving,
             messages,
             setIsSaving,
@@ -325,7 +327,7 @@ export default function ReactPrompting(props: PromptTabProps) {
                             onObservationChange={(e) => handleObservationChange(index, e.target.value)}
                         />
                     ))}
-                    {isLoading ? <LoadingSpinner/> : <></>}
+                    {isLoading ? <LoadingSpinner /> : <></>}
                     <div className="text-left hover:bg-gray-100 p-2">
                         <button className="ml-4 flex text-sm font-medium items-center space-x-2 p-2 rounded-md"
                             onClick={addMessageComponent}>
