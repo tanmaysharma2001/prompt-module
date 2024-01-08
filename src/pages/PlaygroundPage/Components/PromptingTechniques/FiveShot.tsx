@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // Icons
 import {MinusCircledIcon, PlusCircledIcon} from "@radix-ui/react-icons";
@@ -11,7 +11,7 @@ import {useToast} from "@/components/ui/use-toast.ts";
 // Other Components
 import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
-import { PromptTabProps, Prompt, OneShotMessage} from "@/lib/types.ts";
+import { PromptTabProps, OneShotMessage} from "@/lib/types.ts";
 
 
 import {
@@ -77,14 +77,14 @@ export default function FiveShot(props: PromptTabProps) {
     const [isLoading, setIsLoading] = useState(false);
     // const [errorMessage, setErrorMessage] = useState("");
 
-    useEffect(() => {
-        const updatedPlaygroundPrompt: Prompt = {
-            ...props.playgroundPrompt,
-            messages: messages
-        }
-
-        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
-    }, [messages])
+    // useEffect(() => {
+    //     const updatedPlaygroundPrompt: Prompt = {
+    //         ...props.playgroundPrompt,
+    //         messages: messages
+    //     }
+    //
+    //     props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    // }, [messages])
 
 
 

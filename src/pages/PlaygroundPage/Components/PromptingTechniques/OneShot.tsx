@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 // Icons
@@ -13,7 +13,7 @@ import {ScrollArea} from "@/components/ui/scroll-area.tsx"
 import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import { OneShotMessage, Prompt, PromptTabProps} from "@/lib/types.ts";
+import { OneShotMessage, PromptTabProps} from "@/lib/types.ts";
 
 // Utilities Functions
 import {
@@ -60,26 +60,25 @@ export default function OneShot(props: PromptTabProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const [messages, setMessages] = useState<OneShotMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{
+    const [messages, setMessages] = useState<OneShotMessage[]>(props.playgroundPrompt.messages.length !== 0 && props.playgroundPrompt.type === 'one-shot' ? props.playgroundPrompt.messages : [{
         type: "USER",
         message: ""
     }]);
 
     const [isLoading, setIsLoading] = useState(false);
-    // const [errorMessage, setErrorMessage] = useState("");
 
     const { toast } = useToast();
 
     // Save Changes to Playground Prompt when there is a change in
     // messages
-    useEffect(() => {
-        const updatedPlaygroundPrompt: Prompt = {
-            ...props.playgroundPrompt,
-            messages: messages
-        }
-
-        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
-    }, [messages])
+    // useEffect(() => {
+    //     const updatedPlaygroundPrompt: Prompt = {
+    //         ...props.playgroundPrompt,
+    //         messages: messages
+    //     }
+    //
+    //     props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    // }, [messages])
     
 
     const handleMessageChange = (index: number, value: string) => {

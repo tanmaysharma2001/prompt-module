@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 
 // Icons
 import {
@@ -17,7 +17,6 @@ import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechnique
 import {
     ChainOfThoughtMessage,
     PromptTabProps,
-    Prompt
 } from "@/lib/types.ts";
 
 // Utilities Functions
@@ -115,8 +114,7 @@ export default function ChainOfThought(props: PromptTabProps) {
 
     const [isSaving, setIsSaving] = useState(false);
 
-
-    const [messages, setMessages] = useState<ChainOfThoughtMessage[]>(props.playgroundPrompt.messages.length !== 0 ? props.playgroundPrompt.messages : [{
+    const [messages, setMessages] = useState<ChainOfThoughtMessage[]>(props.playgroundPrompt.messages.length !== 0 && props.playgroundPrompt.type === 'chain-of-thought' ? props.playgroundPrompt.messages : [{
         type: "USER",
         message: "",
         thoughts: ["", "", ""]
@@ -129,14 +127,14 @@ export default function ChainOfThought(props: PromptTabProps) {
 
     const MAX_THOUGHTS_LIMIT = 10;
 
-    useEffect(() => {
-        const updatedPlaygroundPrompt: Prompt = {
-            ...props.playgroundPrompt,
-            messages: messages
-        }
-
-        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
-    }, [messages])
+    // useEffect(() => {
+    //     const updatedPlaygroundPrompt: Prompt = {
+    //         ...props.playgroundPrompt,
+    //         messages: messages
+    //     }
+    //
+    //     props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    // }, [messages])
 
 
     const handleMessageChange = (index: number, value: string) => {

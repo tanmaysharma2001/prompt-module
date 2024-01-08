@@ -98,30 +98,6 @@ export default function PlaygroundPage(props: PageProps) {
         }
     });
 
-    // const [activeTab, setActiveTab] = useState(playgroundPrompt.type ? playgroundPrompt.type : "one-shot");
-
-    // const [systemMessage, setSystemMessage] = useState(playgroundPrompt.system_message ? playgroundPrompt.system_message : "");
-
-    // const [topPValue, setTopPValue] = useState(playgroundPrompt.topP ? [Number(playgroundPrompt.topP)] : [0.9]);
-
-    // const [freqPenaltyValue, setFreqPenaltyValue] = useState(playgroundPrompt.frequencyPenalty ? [Number(playgroundPrompt.frequencyPenalty)] : [0.9])
-
-    // const [presencePenaltyValue, setPresencePenaltyValue] = useState(playgroundPrompt.presencePenalty ? [Number(playgroundPrompt.presencePenalty)] : [1])
-
-    // const [tempValue, setTempValue] = useState(playgroundPrompt.temperature ? [Number(playgroundPrompt.temperature)] : [0.56]);
-
-    // const [maxLengthValue, setMaxLengthValue] = useState(playgroundPrompt.maxLength ? [Number(playgroundPrompt.maxLength)] : [256]);
-
-    // const [llmModel, setLLMModel] = useState(playgroundPrompt.model ? playgroundPrompt.model : "gpt-3.5-turbo");
-
-    // const handleSelectChange = (tabName: string) => {
-    //     setActiveTab(tabName);
-    // }
-
-    // const handleLLMSelect = (modelName: string) => {
-    //     setLLMModel(modelName);
-    // }
-
     useEffect(() => {
         sessionStorage.setItem("playgroundPrompt", JSON.stringify(playgroundPrompt));
     }, [playgroundPrompt])

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useState} from "react";
 
 // Icons
 import { MinusCircledIcon, PlusCircledIcon} from "@radix-ui/react-icons";
@@ -11,13 +11,14 @@ import {Button} from "@/components/ui/button.tsx";
 import LoadingSpinner from "@/pages/PlaygroundPage/Components/PromptingTechniques/components/LoadingSpinner.tsx";
 
 // Types
-import { ChainOfThoughtMessage, Prompt, PromptTabProps } from "@/lib/types.ts";
+import { ChainOfThoughtMessage, PromptTabProps } from "@/lib/types.ts";
 
 import {
     handleCompareNavigation, handleResetPrompt,
     handleSavingPrompt,
     sendingChainOfThoughtRequest
 } from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
+
 import {useToast} from "@/components/ui/use-toast.ts";
 
 const PROMPT_COMPLETION_URL = import.meta.env.VITE_PROMPT_COMPLETION_URL;
@@ -124,14 +125,14 @@ export default function ChainOfThought(props: PromptTabProps) {
 
     const MAX_THOUGHTS_LIMIT = 5;
 
-    useEffect(() => {
-        const updatedPlaygroundPrompt: Prompt = {
-            ...props.playgroundPrompt,
-            messages: messages
-        }
-
-        props.setPlaygroundPrompt(updatedPlaygroundPrompt);
-    }, [messages])
+    // useEffect(() => {
+    //     const updatedPlaygroundPrompt: Prompt = {
+    //         ...props.playgroundPrompt,
+    //         messages: messages
+    //     }
+    //
+    //     props.setPlaygroundPrompt(updatedPlaygroundPrompt);
+    // }, [messages])
 
 
     const handleMessageChange = (index: number, value: string) => {
