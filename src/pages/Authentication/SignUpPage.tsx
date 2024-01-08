@@ -126,7 +126,7 @@ export default function SignUpPage() {
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     required
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                    className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                     placeholder="First Name"
                                 />
 
@@ -148,7 +148,7 @@ export default function SignUpPage() {
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     required
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                    className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                     placeholder="Last Name"
                                 />
 
@@ -171,7 +171,7 @@ export default function SignUpPage() {
                                     onChange={(e) => setEmailAddress(e.target.value)}
                                     autoComplete="email"
                                     required
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                    className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                     placeholder="Email"
                                 />
 
@@ -207,7 +207,7 @@ export default function SignUpPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     autoComplete="current-password"
                                     required
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                    className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                     placeholder="Password"
                                 />
 
@@ -253,7 +253,7 @@ export default function SignUpPage() {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                    className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                     placeholder="Confirm Password"
                                 />
 

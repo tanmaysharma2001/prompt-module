@@ -109,7 +109,7 @@ export default function LoginPage() {
                                     onChange={(e) => setEmailAddress(e.target.value)}
                                     autoComplete="email"
                                     required
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                    className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                     placeholder="Email"
                                 />
 
@@ -156,7 +156,7 @@ export default function LoginPage() {
                                         onChange={(e) => setPassword(e.target.value)}
                                         autoComplete="current-password"
                                         required
-                                        className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                                        className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
                                         placeholder="Password"
                                     />
 
