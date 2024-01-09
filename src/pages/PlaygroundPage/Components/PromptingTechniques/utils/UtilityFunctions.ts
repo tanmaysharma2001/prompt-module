@@ -1,5 +1,19 @@
 import {Prompt, PromptTabProps} from "@/lib/types.ts";
 
+// Firebase
+import {collection } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { query, where, getDocs } from "firebase/firestore";
+import {db} from "@/firebase.ts";
+// import Firestore from "firebase/firestore";
+// import QueryDocumentSnapshot = Firestore.QueryDocumentSnapshot;
+// import DocumentData = Firestore.DocumentData;
+// import firebase from "firebase/compat";
+// import DocumentReference = firebase.firestore.DocumentReference;
+
+// import {signInWithEmailAndPassword} from "firebase/auth";
+// import { auth } from "./firebase.ts";
+
 export function sendingOneShotRequest(
     requestUrl: string,
     props: PromptTabProps,
@@ -263,6 +277,62 @@ export function sendingReactPromptRequest(
 }
 
 
+
+export async function savePromptsToFirebase(currentUser: string, promptsArray: any) {
+    const collectionRef = collection(db, 'saved-prompts');
+    const q = query(collectionRef, where('author', '==', currentUser));
+
+    try {
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            // Create a new document if no document exists
+            const newDocRef = doc(collectionRef);
+            await setDoc(newDocRef, {
+                author: currentUser,
+                prompts: promptsArray
+            });
+        } else {
+            // Update the existing document
+            querySnapshot.forEach(async (doc) => {
+                await setDoc(doc.ref, {
+                    prompts: promptsArray
+                }, { merge: true }); // Merge with existing data
+            });
+        }
+
+        console.log('Prompts saved successfully');
+    } catch (error) {
+        console.error('Error saving prompts:', error);
+    }
+}
+
+
+export async function getPromptsOfCurrentUser(currentUser: string): Promise<Prompt[]> {
+    const collectionRef = collection(db, 'saved-prompts');
+    const q = query(collectionRef, where('author', '==', currentUser));
+
+    try {
+        const querySnapshot = await getDocs(q);
+
+        // Assuming each user has only one document
+        if (!querySnapshot.empty) {
+            const docSnapshot = querySnapshot.docs[0];
+            const data = docSnapshot.data();
+
+            if (data.prompts && Array.isArray(data.prompts)) {
+                return data.prompts; // Return the prompts array
+            }
+        }
+
+        return []; // Return an empty array if no document is found or the document has no prompts
+    } catch (error) {
+        console.error('Error fetching prompts:', error);
+        throw error; // Rethrow the error to handle it in the caller function
+    }
+}
+
+
 export function handleSavingPrompt(
     isSaving: boolean,
     messages: any,
@@ -320,6 +390,11 @@ export function handleSavingPrompt(
         };
         promptsArray.push(requestData);
     }
+
+    savePromptsToFirebase(props.currentUser, promptsArray)
+        .then(() => {
+            console.log('Prompts are saved to Firebase');
+        });
 
     // Step 4: Save the updated array back to local storage
     localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));

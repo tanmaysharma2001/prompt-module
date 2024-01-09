@@ -2,7 +2,8 @@ import LyzrLogo from "@/lyzr-logo-oneColor-rgb-600.png";
 import {useState} from "react";
 
 import {createUserWithEmailAndPassword} from 'firebase/auth';
-import {auth} from '@/firebase';
+// import {auth} from '@/firebase';
+import { auth } from "@/firebase.ts"
 import {sendEmailVerification, updateProfile} from "firebase/auth";
 import {useNavigate} from "react-router-dom";
 

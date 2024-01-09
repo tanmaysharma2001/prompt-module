@@ -3,7 +3,8 @@ import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 
 import {signInWithEmailAndPassword, sendPasswordResetEmail} from 'firebase/auth';
-import {auth} from '@/firebase';
+// import {auth} from '@/firebase';
+import { auth } from "@/firebase.ts"
 import {Toaster} from "@/components/ui/toaster.tsx";
 import {useToast} from "@/components/ui/use-toast.ts";
 

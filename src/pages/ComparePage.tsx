@@ -8,6 +8,10 @@ import {useToast} from "@/components/ui/use-toast.ts";
 import { APIKey, Prompt, ReactPromptMessage } from "@/lib/types.ts";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+    getPromptsOfCurrentUser,
+    savePromptsToFirebase
+} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 
 
 interface UserMessagesProp {
@@ -433,6 +437,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
 }
 
 interface PageProps {
+    currentUser: string;
     setActivePage: (value: string) => void;
 }
 
@@ -451,20 +456,37 @@ const LoadingAlertBox = () => {
 
 export default function ComparePage(props: PageProps) {
 
-    const [prompts, setPrompts] = useState<Prompt[]>(() => {
+    const [prompts, setPrompts] = useState<Prompt[]>([]);
 
-        const promptsJson = localStorage.getItem("savedPrompts");
+    useEffect(() => {
+        async function fetchPrompts() {
+            // Get prompts from Firebase
+            try {
+                const prompts: Prompt[] = await getPromptsOfCurrentUser(props.currentUser);
+                console.log(prompts);
 
-        if (promptsJson) {
-            const savedPromptsArray = JSON.parse(promptsJson);
-            return savedPromptsArray.slice(0, 4);
+                localStorage.setItem("savedPrompts", JSON.stringify(prompts));
+
+                // If Firebase returns prompts, use them; otherwise, check localStorage
+                if (prompts.length > 0) {
+                    setPrompts(prompts);
+                } else {
+                    setPrompts([]);
+                }
+            } catch (error) {
+                console.error('Error fetching prompts:', error);
+            }
         }
 
-        return promptsJson ? JSON.parse(promptsJson) : [];
-    });
+        fetchPrompts();
+    }, [props.currentUser]);
 
     // Save any changes in prompts to session storage!!
     useEffect(() => {
+        // Update in the firestore
+        savePromptsToFirebase(props.currentUser, prompts).then(() => {
+            console.log('Changes to Prompt saved to Firebase');
+        })
         localStorage.setItem("savedPrompts", JSON.stringify(prompts));
     }, [prompts]);
 

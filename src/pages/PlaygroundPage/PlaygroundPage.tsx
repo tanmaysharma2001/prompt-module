@@ -62,6 +62,7 @@ const PromptTabs: React.FC<PromptTabProps> = (props) => {
 
 
 interface PageProps {
+    currentUser: string;
     setActivePage: (value: string) => void;
 }
 
@@ -253,6 +254,7 @@ export default function PlaygroundPage(props: PageProps) {
                                             <div
                                                 className="col-span-2 flex flex-col justify-between space-y-4 mt-[5px] min-h-[540px] lg:min-h-[540px]">
                                                 <PromptTabs
+                                                    currentUser={props.currentUser}
                                                     setActivePage={props.setActivePage}
                                                     playgroundPrompt={playgroundPrompt}
                                                     setPlaygroundPrompt={setPlaygroundPrompt}

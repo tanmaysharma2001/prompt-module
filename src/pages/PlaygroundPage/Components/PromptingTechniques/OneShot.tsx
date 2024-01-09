@@ -17,7 +17,8 @@ import { OneShotMessage, PromptTabProps} from "@/lib/types.ts";
 
 // Utilities Functions
 import {
-    handleCompareNavigation, handleResetPrompt,
+    handleCompareNavigation,
+    handleResetPrompt,
     handleSavingPrompt,
     sendingOneShotRequest
 } from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";

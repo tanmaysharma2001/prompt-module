@@ -16,8 +16,7 @@ import {Routes, Route} from 'react-router-dom';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '@/firebase.ts';
 import {Button} from "@/components/ui/button.tsx";
-
-import {  signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 
 
 
@@ -43,11 +42,10 @@ const Navbar: React.FC<NavbarProps> = ({ navigate, activePage, setActivePage }) 
     }
 
     return (
-        <div className={"flex flex-row items-center space-x-6 space-y-6"}>
+        <div className={"flex flex-row justify-between items-center space-x-6 space-y-6"}>
             <img src={LyzerLogo} className={"h-14 w-auto"} />
-            {/*... Other parts of your Navbar ...*/}
-            <div className="basis-3/4 hidden sm:block">
-                <nav className="flex flex-row justify-between" aria-label="Tabs">
+            <div className="hidden sm:block">
+                <nav className="flex flex-row justify-between items-center space-x-8" aria-label="Tabs">
                     <div>
                         <a
                             className={tabClass("Playground")}
@@ -92,13 +90,15 @@ const Prompts = () => {
 
     const [activePage, setActivePage] = useState("Playground");
 
+    const [currentUser, setCurrentUser] = useState("");
+
     useEffect(()=>{
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in, see docs for a list of available properties
                 // https://firebase.google.com/docs/reference/js/firebase.User
                 const uid = user.uid;
-                console.log("uid", uid)
+                setCurrentUser(uid)
             } else {
                 console.log("user is logged out")
                 navigate('/login')
@@ -111,9 +111,9 @@ const Prompts = () => {
         <div className={"ml-10 mr-10"}>
             <Navbar navigate={navigate} activePage={activePage} setActivePage={setActivePage} />
             <Toaster />
-            {activePage === "Playground" && <PlaygroundPage setActivePage={setActivePage} />}
-            {activePage === "Compare" && <ComparePage setActivePage={setActivePage} />}
-            {activePage === "SavedPrompts" && <SavedPromptsPage setActivePage={setActivePage} />}
+            {activePage === "Playground" && <PlaygroundPage currentUser={currentUser} setActivePage={setActivePage} />}
+            {activePage === "Compare" && <ComparePage currentUser={currentUser} setActivePage={setActivePage} />}
+            {activePage === "SavedPrompts" && <SavedPromptsPage currentUser={currentUser} setActivePage={setActivePage} />}
             {activePage === "APIKeys" && <APIKeysPage />}
         </div>
     );
