@@ -132,15 +132,19 @@ const Prompts = () => {
             }
         }
 
-        fetchPrompts();
+        if (currentUser !== "") {
+            fetchPrompts();
+        }
     }, [currentUser]); // Dependency array to re-run this effect if currentUser changes
 
     // Save any changes in prompts to session storage!!
     useEffect(() => {
-        savePromptsToFirebase(currentUser, prompts).then(() => {
-            console.log('Changes to Prompt saved to Firebase');
-        })
-        localStorage.setItem("savedPrompts", JSON.stringify(prompts));
+        if(currentUser !== "") {
+            savePromptsToFirebase(currentUser, prompts).then(() => {
+                console.log('Changes to Prompt saved to Firebase');
+            })
+            localStorage.setItem("savedPrompts", JSON.stringify(prompts));
+        }
     }, [prompts]);
 
 

@@ -85,7 +85,7 @@ export default function PlaygroundPage(props: PageProps) {
             let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
 
             const prompt: Prompt = {
-                id: promptsArray.length + 1,
+                id: generateRandomID(promptsArray),
                 type: "one-shot",
                 model: "",
                 system_message: "",
@@ -104,56 +104,56 @@ export default function PlaygroundPage(props: PageProps) {
     });
 
 
-    useEffect(() => {
-        // Step 1: Check if there is an existing array in local storage
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        // Step 2: Parse the existing array or create a new empty array
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        const prompt: Prompt = {
-            id: generateRandomID(promptsArray),
-            type: "one-shot",
-            model: "",
-            system_message: "",
-            messages: [],
-            temperature: [0.56],
-            maxLength: [256],
-            topP: [0.9],
-            frequencyPenalty: [1],
-            presencePenalty: [1],
-        }
-
-        setPlaygroundPrompt(prompt);
-
-    }, [props.prompts]);
+    // useEffect(() => {
+    //     // Step 1: Check if there is an existing array in local storage
+    //     const existingPrompts = localStorage.getItem('savedPrompts');
+    //
+    //     // Step 2: Parse the existing array or create a new empty array
+    //     let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
+    //
+    //     const prompt: Prompt = {
+    //         id: generateRandomID(promptsArray),
+    //         type: "one-shot",
+    //         model: "",
+    //         system_message: "",
+    //         messages: [],
+    //         temperature: [0.56],
+    //         maxLength: [256],
+    //         topP: [0.9],
+    //         frequencyPenalty: [1],
+    //         presencePenalty: [1],
+    //     }
+    //
+    //     setPlaygroundPrompt(prompt);
+    //
+    // }, [props.prompts]);
 
     useEffect(() => {
         sessionStorage.setItem("playgroundPrompt", JSON.stringify(playgroundPrompt));
     }, [playgroundPrompt])
 
     // Reset Playground Prompt on Tab Change
-    useEffect(() => {
-        const existingPrompts = localStorage.getItem('savedPrompts');
-
-        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
-
-        const prompt: Prompt = {
-            id: generateRandomID(promptsArray),
-            type: "one-shot",
-            model: "",
-            system_message: "",
-            messages: [],
-            temperature: [0.9],
-            maxLength: [256],
-            topP: [0.9],
-            frequencyPenalty: [1],
-            presencePenalty: [1],
-        }
-
-        setPlaygroundPrompt(prompt);
-
-    }, [props.activePage]);
+    // useEffect(() => {
+    //     const existingPrompts = localStorage.getItem('savedPrompts');
+    //
+    //     let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
+    //
+    //     const prompt: Prompt = {
+    //         id: generateRandomID(promptsArray),
+    //         type: "one-shot",
+    //         model: "",
+    //         system_message: "",
+    //         messages: [],
+    //         temperature: [0.9],
+    //         maxLength: [256],
+    //         topP: [0.9],
+    //         frequencyPenalty: [1],
+    //         presencePenalty: [1],
+    //     }
+    //
+    //     setPlaygroundPrompt(prompt);
+    //
+    // }, [props.activePage]);
 
 
     function handleLLMSelect(value: string) {

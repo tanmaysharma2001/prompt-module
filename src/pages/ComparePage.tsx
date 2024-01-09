@@ -25,6 +25,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
                 ?
                 <div>
                     <textarea
+                        readOnly
                         id={`userMessageBox-${prompt.id}`}
                         value={
                             prompt.messages.map((message) => {
@@ -42,6 +43,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
                 ?
                 <div>
                     <textarea
+                        readOnly
                         id={`userMessageBox-${prompt.id}`}
                         value={
                             prompt.messages.map((message) => {
@@ -61,6 +63,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
             {prompt.type === 'five-shot' ?
                 <div>
                     <textarea
+                        readOnly
                         id={`userMessageBox-${prompt.id}`}
                         value={
                             prompt.messages.map((message) => {
@@ -76,6 +79,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
             {prompt.type === 'cot+5-shot' ?
                 <div>
                     <textarea
+                        readOnly
                         id={`userMessageBox-${prompt.id}`}
                         value={
                             prompt.messages.map((message) => {
@@ -94,6 +98,7 @@ const UserMessages: React.FC<UserMessagesProp> = ({ prompt }) => {
             {prompt.type === 'react' ?
                 <div>
                     <textarea
+                        readOnly
                         id={`userMessageBox-${prompt.id}`}
                         value={
                             prompt.messages.map((message: ReactPromptMessage, idx: number) => {
@@ -342,8 +347,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
             </div>
 
             {viewPrompts.map((prompt, idx) => (
-                <div className="flex flex-col w-80 bg-gray-100">
-
+                <div key={idx} className="flex flex-col w-80 bg-gray-100">
                     <div className="h-12 m-1 font-bold text-lg text-center">
                         <div className={"m-2"}>
                             Prompt {idx + 1}
@@ -384,7 +388,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
                                     viewBox="0 0 24 24"
-                                    stroke-width="1.5"
+                                    strokeWidth="1.5"
                                     stroke="currentColor"
                                     className="mt-1 ml-1 w-4 h-4"
                                     onClick={() => {
@@ -392,8 +396,8 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
                                     }}
                                 >
                                     <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
                                         d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
                                     />
                                 </svg>
@@ -417,6 +421,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
                             Response {idx + 1}
                         </div>
                         <textarea
+                            readOnly
                             id="responseMessage"
                             value={promptResponses.find((prompt) => (prompt.id - 1) === idx)?.response}
                             className="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"

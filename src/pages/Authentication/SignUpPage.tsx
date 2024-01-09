@@ -212,7 +212,7 @@ export default function SignUpPage() {
                                     placeholder="Password"
                                 />
 
-                                <button onClick={togglePasswordVisibility}>
+                                <div onClick={togglePasswordVisibility}>
                                         <span
                                             className="absolute inset-y-0 end-0 grid w-10 place-content-center text-gray-500"
                                         >
@@ -234,7 +234,7 @@ export default function SignUpPage() {
                                                 </svg>
                                             }
                                 </span>
-                                </button>
+                                </div>
 
                                 <span
                                     className="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
