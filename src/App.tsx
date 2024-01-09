@@ -17,6 +17,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '@/firebase.ts';
 import {Button} from "@/components/ui/button.tsx";
 import { signOut } from "firebase/auth";
+import {Prompt} from "@/lib/types.ts";
+import {
+    getPromptsOfCurrentUser,
+    savePromptsToFirebase
+} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 
 
 
@@ -92,6 +97,8 @@ const Prompts = () => {
 
     const [currentUser, setCurrentUser] = useState("");
 
+    const [prompts, setPrompts] = useState<Prompt[]>([]);
+
     useEffect(()=>{
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -107,13 +114,43 @@ const Prompts = () => {
 
     }, [])
 
+    useEffect(() => {
+        async function fetchPrompts() {
+            // Get prompts from Firebase
+            try {
+                const prompts: Prompt[] = await getPromptsOfCurrentUser(currentUser);
+
+                localStorage.setItem("savedPrompts", JSON.stringify(prompts));
+
+                if (prompts.length > 0) {
+                    setPrompts(prompts);
+                } else {
+                    setPrompts([]);
+                }
+            } catch (error) {
+                console.error('Error fetching prompts:', error);
+            }
+        }
+
+        fetchPrompts();
+    }, [currentUser]); // Dependency array to re-run this effect if currentUser changes
+
+    // Save any changes in prompts to session storage!!
+    useEffect(() => {
+        savePromptsToFirebase(currentUser, prompts).then(() => {
+            console.log('Changes to Prompt saved to Firebase');
+        })
+        localStorage.setItem("savedPrompts", JSON.stringify(prompts));
+    }, [prompts]);
+
+
     return (
         <div className={"ml-10 mr-10"}>
             <Navbar navigate={navigate} activePage={activePage} setActivePage={setActivePage} />
             <Toaster />
             {activePage === "Playground" && <PlaygroundPage currentUser={currentUser} setActivePage={setActivePage} />}
-            {activePage === "Compare" && <ComparePage currentUser={currentUser} setActivePage={setActivePage} />}
-            {activePage === "SavedPrompts" && <SavedPromptsPage currentUser={currentUser} setActivePage={setActivePage} />}
+            {activePage === "Compare" && <ComparePage prompts={prompts} setPrompts={setPrompts} currentUser={currentUser} setActivePage={setActivePage} />}
+            {activePage === "SavedPrompts" && <SavedPromptsPage prompts={prompts} setPrompts={setPrompts} currentUser={currentUser} setActivePage={setActivePage} />}
             {activePage === "APIKeys" && <APIKeysPage />}
         </div>
     );

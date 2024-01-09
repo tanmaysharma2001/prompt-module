@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion.tsx"
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -7,10 +5,6 @@ import { Button } from "@/components/ui/button.tsx";
 
 // Types
 import { ChainOfThoughtMessage, OneShotMessage, Prompt, ReactPromptMessage } from "@/lib/types.ts";
-import {
-    getPromptsOfCurrentUser,
-    savePromptsToFirebase
-} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 
 // Properly renders the Prompt Message
 interface PromptRendererProps {
@@ -149,46 +143,13 @@ const PromptsList: React.FC<PromptsListProps> = ({ prompts, setPrompts, setActiv
 }
 
 interface PageProps {
+    prompts: Prompt[];
+    setPrompts: (value: Prompt[]) => void;
     currentUser: string;
     setActivePage: (value: string) => void;
 }
 
 export default function SavedPromptsPage(props: PageProps) {
-
-    const [prompts, setPrompts] = useState<Prompt[]>([]);
-
-    useEffect(() => {
-        async function fetchPrompts() {
-            // Get prompts from Firebase
-            try {
-                const prompts: Prompt[] = await getPromptsOfCurrentUser(props.currentUser);
-                console.log(prompts);
-
-                localStorage.setItem("savedPrompts", JSON.stringify(prompts));
-
-                // If Firebase returns prompts, use them; otherwise, check localStorage
-                if (prompts.length > 0) {
-                    setPrompts(prompts);
-                } else {
-                    setPrompts([]);
-                }
-            } catch (error) {
-                console.error('Error fetching prompts:', error);
-            }
-        }
-
-        fetchPrompts();
-    }, [props.currentUser]); // Dependency array to re-run this effect if currentUser changes
-
-
-    // Save any changes in prompts to session storage!!
-    useEffect(() => {
-        savePromptsToFirebase(props.currentUser, prompts).then(() => {
-            console.log('Changes to Prompt saved to Firebase');
-        })
-        localStorage.setItem("savedPrompts", JSON.stringify(prompts));
-    }, [prompts]);
-
     return (
         <div className={"m-5 ml-10 mr-10"}>
             <div className={"flex flex-row m-6"}>
@@ -197,7 +158,7 @@ export default function SavedPromptsPage(props: PageProps) {
                     <Badge className={"inline-block ml-2 "} variant="outline">Saved</Badge>
                 </div>
             </div>
-            <PromptsList prompts={prompts} setPrompts={setPrompts} setActivePage={props.setActivePage} />
+            <PromptsList prompts={props.prompts} setPrompts={props.setPrompts} setActivePage={props.setActivePage} />
         </div>
     );
 }

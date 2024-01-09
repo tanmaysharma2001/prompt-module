@@ -8,10 +8,6 @@ import {useToast} from "@/components/ui/use-toast.ts";
 import { APIKey, Prompt, ReactPromptMessage } from "@/lib/types.ts";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-    getPromptsOfCurrentUser,
-    savePromptsToFirebase
-} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 
 
 interface UserMessagesProp {
@@ -134,6 +130,10 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
     // View Prompts: Duplicate use to modify prompts view without the need of modifying the original prompts.
     // Change in prompts also results in change in viewPrompts as both are reloaded when the component is reloaded.
     const [viewPrompts, setViewPrompts] = useState<Prompt[]>(prompts);
+
+    useEffect(() => {
+        setViewPrompts(prompts);
+    }, [prompts]);
 
     const [promptResponses, setPromptResponses] = useState(() => {
         return viewPrompts.map((prompt) => {
@@ -437,6 +437,8 @@ const TableComponent: React.FC<TableComponentProps> = ({ prompts, setShowLoading
 }
 
 interface PageProps {
+    prompts: Prompt[];
+    setPrompts: (value: Prompt[]) => void;
     currentUser: string;
     setActivePage: (value: string) => void;
 }
@@ -456,47 +458,13 @@ const LoadingAlertBox = () => {
 
 export default function ComparePage(props: PageProps) {
 
-    const [prompts, setPrompts] = useState<Prompt[]>([]);
-
-    useEffect(() => {
-        async function fetchPrompts() {
-            // Get prompts from Firebase
-            try {
-                const prompts: Prompt[] = await getPromptsOfCurrentUser(props.currentUser);
-                console.log(prompts);
-
-                localStorage.setItem("savedPrompts", JSON.stringify(prompts));
-
-                // If Firebase returns prompts, use them; otherwise, check localStorage
-                if (prompts.length > 0) {
-                    setPrompts(prompts);
-                } else {
-                    setPrompts([]);
-                }
-            } catch (error) {
-                console.error('Error fetching prompts:', error);
-            }
-        }
-
-        fetchPrompts();
-    }, [props.currentUser]);
-
-    // Save any changes in prompts to session storage!!
-    useEffect(() => {
-        // Update in the firestore
-        savePromptsToFirebase(props.currentUser, prompts).then(() => {
-            console.log('Changes to Prompt saved to Firebase');
-        })
-        localStorage.setItem("savedPrompts", JSON.stringify(prompts));
-    }, [prompts]);
-
     const [showAlert, setShowLoadingAlert] = useState(false);
 
 
     return (
         <div className={"m-5"}>
             {showAlert && <LoadingAlertBox />}
-            <TableComponent setShowLoadingAlert={setShowLoadingAlert} prompts={prompts} setPrompts={setPrompts} setActivePage={props.setActivePage} />
+            <TableComponent setShowLoadingAlert={setShowLoadingAlert} prompts={props.prompts} setPrompts={props.setPrompts} setActivePage={props.setActivePage} />
         </div>
     );
 }

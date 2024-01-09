@@ -2,7 +2,7 @@ import {Prompt, PromptTabProps} from "@/lib/types.ts";
 
 // Firebase
 import {collection } from "firebase/firestore";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { query, where, getDocs } from "firebase/firestore";
 import {db} from "@/firebase.ts";
 // import Firestore from "firebase/firestore";
@@ -294,10 +294,11 @@ export async function savePromptsToFirebase(currentUser: string, promptsArray: a
             });
         } else {
             // Update the existing document
-            querySnapshot.forEach(async (doc) => {
-                await setDoc(doc.ref, {
+            querySnapshot.forEach((doc) => {
+                updateDoc(doc.ref, {
+                    author: currentUser,
                     prompts: promptsArray
-                }, { merge: true }); // Merge with existing data
+                }); // Merge with existing data
             });
         }
 
