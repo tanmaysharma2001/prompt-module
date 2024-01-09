@@ -363,22 +363,28 @@ export function handleSavingPrompt(
 
     if (existingPromptIndex !== -1) {
         // If prompt with the same id exists, update it
-        promptsArray[existingPromptIndex] = {
-            id: props.playgroundPrompt.id,
-            type: props.playgroundPrompt.type,
-            model: props.playgroundPrompt.model,
-            system_message: props.playgroundPrompt.system_message, // Assuming systemMessage is passed as a prop
-            messages: messages,
-            temperature: props.playgroundPrompt.temperature,
-            maxLength: props.playgroundPrompt.maxLength,
-            topP: props.playgroundPrompt.topP,
-            frequencyPenalty: props.playgroundPrompt.frequencyPenalty,
-            presencePenalty: props.playgroundPrompt.presencePenalty
-        };
+        // change by id not index
+        promptsArray = promptsArray.map((prompt: Prompt) => {
+            if(prompt.id === props.playgroundPrompt.id) {
+                return {
+                    id: props.playgroundPrompt.id,
+                    type: props.playgroundPrompt.type,
+                    model: props.playgroundPrompt.model,
+                    system_message: props.playgroundPrompt.system_message, // Assuming systemMessage is passed as a prop
+                    messages: messages,
+                    temperature: props.playgroundPrompt.temperature,
+                    maxLength: props.playgroundPrompt.maxLength,
+                    topP: props.playgroundPrompt.topP,
+                    frequencyPenalty: props.playgroundPrompt.frequencyPenalty,
+                    presencePenalty: props.playgroundPrompt.presencePenalty
+                };
+            }
+            return prompt;
+        })
     } else {
         // If prompt with the same id doesn't exist, append the new one
         const requestData = {
-            id: promptsArray.length + 1,
+            id: props.playgroundPrompt.id,
             type: props.playgroundPrompt.type,
             model: props.playgroundPrompt.model,
             system_message: props.playgroundPrompt.system_message, // Assuming systemMessage is passed as a prop
@@ -396,6 +402,9 @@ export function handleSavingPrompt(
         .then(() => {
             console.log('Prompts are saved to Firebase');
         });
+
+    // Save to Prompts State too
+    props.setPrompts(promptsArray);
 
     // Step 4: Save the updated array back to local storage
     localStorage.setItem('savedPrompts', JSON.stringify(promptsArray));
@@ -416,7 +425,7 @@ export function handleResetPrompt(
     let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
 
     const prompt: Prompt = {
-        id: promptsArray.length + 1,
+        id: generateRandomID(promptsArray),
         type: props.playgroundPrompt.type,
         model: props.playgroundPrompt.model,
         system_message: "",
@@ -436,7 +445,21 @@ export function handleResetPrompt(
 }
 
 
-
 export function handleCompareNavigation(props: PromptTabProps) {
     props.setActivePage('Compare');
+}
+
+export function generateRandomID(promptsArray: Prompt[]) {
+    let uniqueID: number;
+
+    // Function to generate a random number as ID
+    // const generateID = () => Math.floor(Math.random() * 1000000); // Adjust range as needed
+    let counter = 1;
+
+    do {
+        uniqueID = counter;
+        counter = counter + 1;
+    } while (promptsArray.some(prompt => prompt.id === uniqueID));
+
+    return uniqueID;
 }

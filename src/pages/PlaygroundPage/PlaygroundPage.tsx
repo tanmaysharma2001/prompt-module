@@ -27,7 +27,8 @@ import MaxLengthSelector from "@/pages/PlaygroundPage/Components/max-length-sele
 import TopPSelector from "@/pages/PlaygroundPage/Components/top-p-selector.tsx"
 
 // Types
-import { Prompt, PromptTabProps } from "@/lib/types.ts";
+import {Prompt, PromptTabProps} from "@/lib/types.ts";
+import {generateRandomID} from "@/pages/PlaygroundPage/Components/PromptingTechniques/utils/UtilityFunctions.ts";
 
 interface TabConfiguration {
     [key: string]: React.ElementType;
@@ -62,6 +63,9 @@ const PromptTabs: React.FC<PromptTabProps> = (props) => {
 
 
 interface PageProps {
+    prompts: Prompt[];
+    setPrompts: (value: Prompt[]) => void;
+    activePage: string;
     currentUser: string;
     setActivePage: (value: string) => void;
 }
@@ -99,9 +103,57 @@ export default function PlaygroundPage(props: PageProps) {
         }
     });
 
+
+    useEffect(() => {
+        // Step 1: Check if there is an existing array in local storage
+        const existingPrompts = localStorage.getItem('savedPrompts');
+
+        // Step 2: Parse the existing array or create a new empty array
+        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
+
+        const prompt: Prompt = {
+            id: generateRandomID(promptsArray),
+            type: "one-shot",
+            model: "",
+            system_message: "",
+            messages: [],
+            temperature: [0.56],
+            maxLength: [256],
+            topP: [0.9],
+            frequencyPenalty: [1],
+            presencePenalty: [1],
+        }
+
+        setPlaygroundPrompt(prompt);
+
+    }, [props.prompts]);
+
     useEffect(() => {
         sessionStorage.setItem("playgroundPrompt", JSON.stringify(playgroundPrompt));
     }, [playgroundPrompt])
+
+    // Reset Playground Prompt on Tab Change
+    useEffect(() => {
+        const existingPrompts = localStorage.getItem('savedPrompts');
+
+        let promptsArray = existingPrompts ? JSON.parse(existingPrompts) : [];
+
+        const prompt: Prompt = {
+            id: generateRandomID(promptsArray),
+            type: "one-shot",
+            model: "",
+            system_message: "",
+            messages: [],
+            temperature: [0.9],
+            maxLength: [256],
+            topP: [0.9],
+            frequencyPenalty: [1],
+            presencePenalty: [1],
+        }
+
+        setPlaygroundPrompt(prompt);
+
+    }, [props.activePage]);
 
 
     function handleLLMSelect(value: string) {
@@ -224,7 +276,8 @@ export default function PlaygroundPage(props: PageProps) {
                     <div className="container h-full py-2">
                         <div className="grid h-full items-stretch gap-6 md:grid-cols-[1fr_200px]">
                             <div className="hidden flex-col space-y-4 sm:flex md:order-2">
-                                <TemperatureSelector tempValue={playgroundPrompt.temperature} setTempValue={handleTemperatureChange}/>
+                                <TemperatureSelector tempValue={playgroundPrompt.temperature}
+                                                     setTempValue={handleTemperatureChange}/>
                                 <MaxLengthSelector maxLengthValue={playgroundPrompt.maxLength}
                                                    setMaxLengthValue={handleMaxLengthChange}/>
                                 <TopPSelector topPValue={playgroundPrompt.topP} setTopPValue={handleTopPChange}/>
@@ -254,6 +307,8 @@ export default function PlaygroundPage(props: PageProps) {
                                             <div
                                                 className="col-span-2 flex flex-col justify-between space-y-4 mt-[5px] min-h-[540px] lg:min-h-[540px]">
                                                 <PromptTabs
+                                                    prompts={props.prompts}
+                                                    setPrompts={props.setPrompts}
                                                     currentUser={props.currentUser}
                                                     setActivePage={props.setActivePage}
                                                     playgroundPrompt={playgroundPrompt}

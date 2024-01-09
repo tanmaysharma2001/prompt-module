@@ -36,6 +36,8 @@ export interface ReactPromptMessage {
 
 
 export interface PromptTabProps {
+    prompts: Prompt[];
+    setPrompts: (value: Prompt[]) => void;
     currentUser: string;
     playgroundPrompt: Prompt;
     setPlaygroundPrompt: (prompt: Prompt) => void;

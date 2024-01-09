@@ -148,7 +148,7 @@ const Prompts = () => {
         <div className={"ml-10 mr-10"}>
             <Navbar navigate={navigate} activePage={activePage} setActivePage={setActivePage} />
             <Toaster />
-            {activePage === "Playground" && <PlaygroundPage currentUser={currentUser} setActivePage={setActivePage} />}
+            {activePage === "Playground" && <PlaygroundPage prompts={prompts} setPrompts={setPrompts} currentUser={currentUser} activePage={activePage} setActivePage={setActivePage} />}
             {activePage === "Compare" && <ComparePage prompts={prompts} setPrompts={setPrompts} currentUser={currentUser} setActivePage={setActivePage} />}
             {activePage === "SavedPrompts" && <SavedPromptsPage prompts={prompts} setPrompts={setPrompts} currentUser={currentUser} setActivePage={setActivePage} />}
             {activePage === "APIKeys" && <APIKeysPage />}
